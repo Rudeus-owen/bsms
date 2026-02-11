@@ -1,3 +1,8 @@
 export 'src/utils/app_styles.dart';
+export 'src/share/app_config.dart';
 export 'src/widgets/finisher_background.dart';
+export 'src/widgets/app_drawer.dart';
+export 'src/widgets/connectivity_indicator.dart';
+export 'src/widgets/main_scaffold.dart';
 export 'src/views/signinpage.dart';
+export 'src/views/overview_screen.dart';

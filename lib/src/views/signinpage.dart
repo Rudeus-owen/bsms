@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
 class SignInPage extends StatefulWidget {
+  static const routeName = '/signin';
   const SignInPage({super.key});
 
   @override
@@ -127,7 +128,9 @@ class _SignInPageState extends State<SignInPage> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // TODO: Handle sign in
+                              Navigator.of(context).pushReplacementNamed(
+                                OverviewScreen.routeName,
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(

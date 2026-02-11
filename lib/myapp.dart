@@ -8,26 +8,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My App',
+      title: 'Beauty Salon Management',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: const SignInPage(),
+      initialRoute: SignInPage.routeName,
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) {
+            switch (settings.name) {
+              case SignInPage.routeName:
+                return const SignInPage();
+              case OverviewScreen.routeName:
+                return const OverviewScreen();
+              default:
+                return const SignInPage();
+            }
+          },
+        );
+      },
     );
   }
 }
-
-// class HomePage extends StatelessWidget {
-//   const HomePage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Scaffold(
-//       body: Center(
-//         child: Text("Clean Architecture Start 🚀"),
-//       ),
-//     );
-//   }
-// }
