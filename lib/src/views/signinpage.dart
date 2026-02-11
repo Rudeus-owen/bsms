@@ -1,3 +1,5 @@
+import 'package:bsms/src/utils/build_context.dart';
+import 'package:bsms/src/views/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -28,16 +30,17 @@ class _SignInPageState extends State<SignInPage> {
       body: Stack(
         children: [
           // Native animated background
-          const Positioned.fill(
-            child: FinisherBackground(),
-          ),
+          const Positioned.fill(child: FinisherBackground()),
 
           // Login Card On Top
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
                 decoration: AppDecorations.card,
                 child: Form(
                   key: _formKey,
@@ -45,9 +48,15 @@ class _SignInPageState extends State<SignInPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Welcome Back to BSMS", style: AppTextStyles.heading),
+                      const Text(
+                        "Welcome Back to BSMS",
+                        style: AppTextStyles.heading,
+                      ),
                       const SizedBox(height: 6),
-                      const Text("Enter sign in data to continue", style: AppTextStyles.subheading),
+                      const Text(
+                        "Enter sign in data to continue",
+                        style: AppTextStyles.subheading,
+                      ),
                       const SizedBox(height: 28),
 
                       // Email or Phone Field
@@ -57,10 +66,16 @@ class _SignInPageState extends State<SignInPage> {
                         decoration: InputDecoration(
                           labelText: "Email or Phone",
                           hintText: "Enter your email or phone",
-                          prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
+                          prefixIcon: const Icon(
+                            Icons.person_outline,
+                            color: AppColors.primary,
+                          ),
                           border: AppDecorations.inputBorder,
                           focusedBorder: AppDecorations.inputFocusedBorder,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -78,10 +93,15 @@ class _SignInPageState extends State<SignInPage> {
                         decoration: InputDecoration(
                           labelText: "Password",
                           hintText: "Enter your password",
-                          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: AppColors.primary,
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: AppColors.grey,
                             ),
                             onPressed: () {
@@ -92,7 +112,10 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           border: AppDecorations.inputBorder,
                           focusedBorder: AppDecorations.inputFocusedBorder,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -115,7 +138,10 @@ class _SignInPageState extends State<SignInPage> {
                             minimumSize: const Size(0, 0),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text("Forgot Password?", style: AppTextStyles.link),
+                          child: const Text(
+                            "Forgot Password?",
+                            style: AppTextStyles.link,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 22),
@@ -127,7 +153,7 @@ class _SignInPageState extends State<SignInPage> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // TODO: Handle sign in
+                              context.toNextScreen(HomePage());
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -138,7 +164,10 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             elevation: 4,
                           ),
-                          child: const Text("Sign In", style: AppTextStyles.button),
+                          child: const Text(
+                            "Sign In",
+                            style: AppTextStyles.button,
+                          ),
                         ),
                       ),
                     ],
