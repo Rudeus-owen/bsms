@@ -1,5 +1,5 @@
-import 'package:bsms/src/views/signinpage.dart';
 import 'package:flutter/material.dart';
+import 'package:bsms/exports.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
