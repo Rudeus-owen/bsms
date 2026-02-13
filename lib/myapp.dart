@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
       title: 'Beauty Salon Management',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        scaffoldBackgroundColor: AppColors.scaffoldBg,
       ),
       initialRoute: SignInPage.routeName,
       onGenerateRoute: (RouteSettings settings) {
@@ -22,6 +23,10 @@ class MyApp extends StatelessWidget {
                 return const SignInPage();
               case OverviewScreen.routeName:
                 return const OverviewScreen();
+              case EmployeeScreen.routeName:
+                return const EmployeeScreen();
+              case EmployeeEditScreen.routeName:
+                return const EmployeeEditScreen();
               default:
                 return const SignInPage();
             }

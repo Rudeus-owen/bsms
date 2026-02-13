@@ -2,8 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
-/// A native Flutter recreation of the FinisherHeader animated background.
-/// Draws floating gradient circles that bounce around the screen.
 class FinisherBackground extends StatefulWidget {
   final Color backgroundColor;
   final List<Color> particleColors;

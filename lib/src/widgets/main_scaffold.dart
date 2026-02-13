@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
-/// Shared scaffold wrapper with common AppBar, Drawer, and ConnectivityIndicator.
-/// Every screen should use this instead of building its own Scaffold + AppBar.
 class MainScaffold extends StatefulWidget {
   final String title;
   final Widget body;

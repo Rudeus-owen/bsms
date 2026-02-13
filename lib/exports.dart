@@ -6,3 +6,8 @@ export 'src/widgets/connectivity_indicator.dart';
 export 'src/widgets/main_scaffold.dart';
 export 'src/views/signinpage.dart';
 export 'src/views/overview_screen.dart';
+export 'src/views/employee_screen.dart';
+export 'src/views/employee_edit_screen.dart';
+export 'src/utils/summary_card.dart';
+export 'src/utils/data_filter_bar.dart';
+export 'src/utils/dynamic_data_table.dart';
