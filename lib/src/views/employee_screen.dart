@@ -13,6 +13,16 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   DateTime? _selectedDate;
   String _selectedStatus = 'All Status';
   String _searchQuery = '';
+  int _currentPage = 1;
+  final int _itemsPerPage = 10;
+
+  List<Map<String, dynamic>> get _paginatedEmployees {
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = startIndex + _itemsPerPage;
+    if (startIndex >= _filteredEmployees.length) return [];
+    return _filteredEmployees.sublist(
+        startIndex, endIndex.clamp(0, _filteredEmployees.length));
+  }
 
   // ── Dummy data (swap with API later) ──────────────────────────────────
   final List<Map<String, dynamic>> _allEmployees = [
@@ -64,6 +74,55 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
       'status': 'Active',
       'joinDate': '2024-12-01',
     },
+    // Added more dummy data
+    {
+      'name': 'Kyaw Kyaw',
+      'phone': '09-789-0123',
+      'role': 'Barber',
+      'experience': 'Experienced',
+      'status': 'Active',
+      'joinDate': '2023-05-20',
+    },
+    {
+      'name': 'Su Su',
+      'phone': '09-890-1234',
+      'role': 'Makeup Artist',
+      'experience': 'Non-experienced',
+      'status': 'Active',
+      'joinDate': '2024-02-14',
+    },
+    {
+      'name': 'Aung Aung',
+      'phone': '09-901-2345',
+      'role': 'Senior Stylist',
+      'experience': 'Experienced',
+      'status': 'Active',
+      'joinDate': '2021-11-11',
+    },
+    {
+      'name': 'Mya Mya',
+      'phone': '09-012-3456',
+      'role': 'Nail Technician',
+      'experience': 'Experienced',
+      'status': 'Inactive',
+      'joinDate': '2022-08-08',
+    },
+    {
+      'name': 'Thida',
+      'phone': '09-123-4567',
+      'role': 'Receptionist',
+      'experience': 'Non-experienced',
+      'status': 'Active',
+      'joinDate': '2025-01-01',
+    },
+    {
+      'name': 'Bo Bo',
+      'phone': '09-234-5678',
+      'role': 'Security',
+      'experience': 'Experienced',
+      'status': 'Active',
+      'joinDate': '2020-01-01',
+    },
   ];
 
   List<Map<String, dynamic>> get _filteredEmployees {
@@ -111,12 +170,15 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                   height: 34,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // TODO: navigate to add employee screen
+                      Navigator.pushNamed(
+                        context,
+                        EmployeeEditScreen.routeName,
+                      );
                     },
                     icon: const Icon(Icons.add, size: 15),
                     label: const Text('New Employee'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E7D32),
+                      backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       shape: RoundedRectangleBorder(
@@ -134,38 +196,41 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
             const SizedBox(height: 12),
 
             // ── Summary Cards (3‑across, fits any width) ─────────
-            Row(
-              children: [
-                Expanded(
-                  child: SummaryCard(
-                    icon: Icons.people,
-                    iconColor: Colors.blue.shade700,
-                    iconBgColor: Colors.blue.shade50,
-                    count: _totalCount,
-                    label: 'Total',
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: SummaryCard(
+                      icon: Icons.people,
+                      iconColor: Colors.blue.shade700,
+                      iconBgColor: Colors.blue.shade50,
+                      count: _totalCount,
+                      label: 'Total',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: SummaryCard(
-                    icon: Icons.person,
-                    iconColor: Colors.green.shade700,
-                    iconBgColor: Colors.green.shade50,
-                    count: _expCount,
-                    label: 'Experienced',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SummaryCard(
+                      icon: Icons.person,
+                      iconColor: Colors.green.shade700,
+                      iconBgColor: Colors.green.shade50,
+                      count: _expCount,
+                      label: 'Experienced',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: SummaryCard(
-                    icon: Icons.person_outline,
-                    iconColor: Colors.orange.shade700,
-                    iconBgColor: Colors.orange.shade50,
-                    count: _nonExpCount,
-                    label: 'Non-Exp',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SummaryCard(
+                      icon: Icons.person_outline,
+                      iconColor: Colors.orange.shade700,
+                      iconBgColor: Colors.orange.shade50,
+                      count: _nonExpCount,
+                      label: 'Non-Experience',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -173,19 +238,29 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
             // ── Filters ──────────────────────────────────────────
             DataFilterBar(
               selectedDate: _selectedDate,
-              onDateChanged: (d) => setState(() => _selectedDate = d),
+              onDateChanged: (d) => setState(() {
+                _selectedDate = d;
+                _currentPage = 1;
+              }),
               statusOptions: const ['All Status', 'Active', 'Inactive'],
               selectedStatus: _selectedStatus,
-              onStatusChanged: (s) => setState(() => _selectedStatus = s),
+              onStatusChanged: (s) => setState(() {
+                _selectedStatus = s;
+                _currentPage = 1;
+              }),
               searchHint: 'Search employee...',
-              onSearchChanged: (q) => setState(() => _searchQuery = q),
+              onSearchChanged: (q) => setState(() {
+                _searchQuery = q;
+                _currentPage = 1;
+              }),
             ),
 
             const SizedBox(height: 12),
 
             // ── Data ─────────────────────────────────────────────
+            // ── Data ─────────────────────────────────────────────
             DynamicDataTable(
-              data: _filteredEmployees,
+              data: _paginatedEmployees,
               onRowTap: (row) {
                 Navigator.pushNamed(
                   context,
@@ -194,6 +269,40 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                 );
               },
             ),
+
+            const SizedBox(height: 12),
+
+            // ── Pagination Controls ──────────────────────────────
+            if (_filteredEmployees.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Page $_currentPage of ${(_filteredEmployees.length / _itemsPerPage).ceil()}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: _currentPage > 1
+                        ? () => setState(() => _currentPage--)
+                        : null,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: _currentPage <
+                            (_filteredEmployees.length / _itemsPerPage).ceil()
+                        ? () => setState(() => _currentPage++)
+                        : null,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

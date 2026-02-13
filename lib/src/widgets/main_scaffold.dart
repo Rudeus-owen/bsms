@@ -4,6 +4,7 @@ import 'package:bsms/exports.dart';
 class MainScaffold extends StatefulWidget {
   final String title;
   final Widget body;
+  final bool showBackButton;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
 
@@ -13,6 +14,7 @@ class MainScaffold extends StatefulWidget {
     required this.body,
     this.actions,
     this.floatingActionButton,
+    this.showBackButton = false,
   });
 
   @override
@@ -37,9 +39,6 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final title = _screenTitles.contains(widget.title)
-        ? widget.title
-        : _screenTitles[_selectedIndex];
 
     return Scaffold(
       appBar: AppBar(
@@ -47,17 +46,19 @@ class _MainScaffoldState extends State<MainScaffold> {
         surfaceTintColor: AppColors.white,
         elevation: 0.5,
         shadowColor: Colors.grey.withAlpha(80),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.primary),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
+        leading: widget.showBackButton
+            ? BackButton(color: AppColors.primary)
+            : Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, color: AppColors.primary),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              widget.title,
               style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,

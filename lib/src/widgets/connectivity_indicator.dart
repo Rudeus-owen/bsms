@@ -38,36 +38,39 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
   }
 
   void _onNetworkChanged(List<ConnectivityResult> results) {
-    final r = results.isNotEmpty ? results.first : ConnectivityResult.none;
-
-    if (r == ConnectivityResult.none) {
+    if (results.isEmpty || results.contains(ConnectivityResult.none)) {
       _setStatus(false, 'Offline');
-    } else {
-      // Show type immediately, then verify in background
-      final type = switch (r) {
-        ConnectivityResult.wifi => 'Wi-Fi',
-        ConnectivityResult.mobile => 'Mobile',
-        ConnectivityResult.ethernet => 'Ethernet',
-        _ => 'Online',
-      };
-      _setStatus(true, type);
-      _pingCheck(); // quick background verify
+      return;
     }
+
+    // Determine primary connection type
+    String type = 'Online';
+    if (results.contains(ConnectivityResult.wifi)) {
+      type = 'Wi-Fi';
+    } else if (results.contains(ConnectivityResult.mobile)) {
+      type = 'Mobile';
+    } else if (results.contains(ConnectivityResult.ethernet)) {
+      type = 'Ethernet';
+    }
+
+    _setStatus(true, type);
+    
+    _pingCheck(); 
   }
 
   Future<void> _pingCheck() async {
+    if (!_isConnected) return;
+
     try {
-      final socket = await Socket.connect('8.8.8.8', 53,
-          timeout: const Duration(seconds: 2));
-      socket.destroy();
+      final result = await InternetAddress.lookup('google.com');
       if (!mounted) return;
-      if (!_isConnected) {
-        // Was showing offline but now reachable
-        _setStatus(true, 'Online');
+      
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+         // Confirmed online
+         if (!_isConnected) _setStatus(true, _label);
       }
     } catch (_) {
       if (!mounted) return;
-      _setStatus(false, 'No Internet');
     }
   }
 
