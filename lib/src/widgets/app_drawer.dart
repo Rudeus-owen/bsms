@@ -1,6 +1,8 @@
 import 'package:bsms/src/utils/build_context.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
+import 'package:bsms/src/views/employee_screen.dart';
+import 'package:bsms/src/views/overview_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final int selectedIndex;
@@ -129,8 +131,26 @@ class AppDrawer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     onTap: () {
+                      final nav = Navigator.of(context);
+                      final messenger = ScaffoldMessenger.of(context);
                       onItemSelected(index);
-                      // Navigator.pop(context);
+                      nav.pop(); // close drawer
+                      // Navigate based on index
+                      switch (index) {
+                        case 0:
+                          nav.pushNamed(OverviewScreen.routeName);
+                          break;
+                        case 2:
+                          nav.pushNamed(EmployeeScreen.routeName);
+                          break;
+                        default:
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('${_items[index].label} coming soon!'),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                      }
                     },
                   ),
                 );

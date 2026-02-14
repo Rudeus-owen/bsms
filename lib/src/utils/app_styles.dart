@@ -16,6 +16,9 @@ class AppColors {
   static const Color grey = Colors.grey;
   static const Color greyLight = Color(0xFFBDBDBD);
 
+  // Backgrounds
+  static const Color scaffoldBg = Color(0xFFF5F6FA);
+
   // Shadows
   static Color shadow = Colors.black.withAlpha(38);
 

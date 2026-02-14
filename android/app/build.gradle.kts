@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.bsms"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = "28.2.13676358"
 
     compileOptions {

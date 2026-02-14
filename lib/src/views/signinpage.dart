@@ -33,15 +33,16 @@ class _SignInPageState extends State<SignInPage> {
           // Native animated background
           const Positioned.fill(child: FinisherBackground()),
 
-          // Login Card On Top
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
-                ),
+            // Login Card On Top
+            Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  margin: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
                 decoration: AppDecorations.card,
                 child: Form(
                   key: _formKey,
