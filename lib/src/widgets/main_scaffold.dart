@@ -1,3 +1,5 @@
+import 'package:bsms/src/utils/build_context.dart';
+import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -85,7 +87,21 @@ class _MainScaffoldState extends State<MainScaffold> {
       ),
       drawer: AppDrawer(
         selectedIndex: _selectedIndex,
-        onItemSelected: (index) => setState(() => _selectedIndex = index),
+        onItemSelected: (index) {
+          setState(() => _selectedIndex = index);
+          switch (index) {
+            case 0:
+              Navigator.of(context).pushReplacementNamed(
+                OverviewScreen.routeName,
+              );
+              break;
+            case 1:
+              Navigator.of(context).pushReplacementNamed(
+                ServiceRecordScreen.routeName,
+              );
+              break;
+          }
+        },
       ),
       body: widget.body,
       floatingActionButton: widget.floatingActionButton,

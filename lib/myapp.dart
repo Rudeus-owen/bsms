@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -22,6 +25,8 @@ class MyApp extends StatelessWidget {
                 return const SignInPage();
               case OverviewScreen.routeName:
                 return const OverviewScreen();
+              case ServiceRecordScreen.routeName:
+                return const ServiceRecordScreen();
               default:
                 return const SignInPage();
             }
