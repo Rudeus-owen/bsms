@@ -21,7 +21,9 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
     final endIndex = startIndex + _itemsPerPage;
     if (startIndex >= _filteredEmployees.length) return [];
     return _filteredEmployees.sublist(
-        startIndex, endIndex.clamp(0, _filteredEmployees.length));
+      startIndex,
+      endIndex.clamp(0, _filteredEmployees.length),
+    );
   }
 
   // ── Dummy data (swap with API later) ──────────────────────────────────
@@ -127,8 +129,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
 
   List<Map<String, dynamic>> get _filteredEmployees {
     return _allEmployees.where((emp) {
-      if (_selectedStatus != 'All Status' &&
-          emp['status'] != _selectedStatus) {
+      if (_selectedStatus != 'All Status' && emp['status'] != _selectedStatus) {
         return false;
       }
       if (_searchQuery.isNotEmpty) {
@@ -151,6 +152,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   Widget build(BuildContext context) {
     return MainScaffold(
       title: 'Employees',
+      selectedIndex: 2,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
@@ -185,7 +187,9 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                         borderRadius: BorderRadius.circular(7),
                       ),
                       textStyle: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w600),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                       elevation: 0,
                     ),
                   ),
@@ -293,7 +297,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                   const SizedBox(width: 16),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: _currentPage <
+                    onPressed:
+                        _currentPage <
                             (_filteredEmployees.length / _itemsPerPage).ceil()
                         ? () => setState(() => _currentPage++)
                         : null,

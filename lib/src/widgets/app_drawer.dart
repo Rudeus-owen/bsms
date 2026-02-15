@@ -22,7 +22,10 @@ class AppDrawer extends StatelessWidget {
     _DrawerItem(icon: Icons.group_outlined, label: 'Customer Management'),
     _DrawerItem(icon: Icons.person_outlined, label: 'Clients'),
     _DrawerItem(icon: Icons.content_cut_outlined, label: 'Services'),
-    _DrawerItem(icon: Icons.account_balance_wallet_outlined, label: 'Expense/Income'),
+    _DrawerItem(
+      icon: Icons.account_balance_wallet_outlined,
+      label: 'Expense/Income',
+    ),
   ];
 
   @override
@@ -48,7 +51,14 @@ class AppDrawer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
-                    child: Text('B', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+                    child: Text(
+                      'B',
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -56,8 +66,18 @@ class AppDrawer extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Beauty Salon', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.black)),
-                      Text('Management', style: TextStyle(fontSize: 12, color: AppColors.grey)),
+                      Text(
+                        'Beauty Salon',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      Text(
+                        'Management',
+                        style: TextStyle(fontSize: 12, color: AppColors.grey),
+                      ),
                     ],
                   ),
                 ),
@@ -78,24 +98,37 @@ class AppDrawer extends StatelessWidget {
                 final item = _items[index];
                 final isSelected = selectedIndex == index;
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary.withAlpha(20) : Colors.transparent,
+                    color: isSelected
+                        ? AppColors.primary.withAlpha(20)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
-                    leading: Icon(item.icon, color: isSelected ? AppColors.primary : AppColors.grey, size: 22),
+                    leading: Icon(
+                      item.icon,
+                      color: isSelected ? AppColors.primary : AppColors.grey,
+                      size: 22,
+                    ),
                     title: Text(
                       item.label,
                       style: TextStyle(
                         color: isSelected ? AppColors.primary : AppColors.black,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                         fontSize: 14,
                       ),
                     ),
                     dense: true,
                     visualDensity: const VisualDensity(vertical: -1),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     onTap: () {
                       final nav = Navigator.of(context);
                       final messenger = ScaffoldMessenger.of(context);
@@ -109,10 +142,15 @@ class AppDrawer extends StatelessWidget {
                         case 2:
                           nav.pushNamed(EmployeeScreen.routeName);
                           break;
+                        case 5:
+                          nav.pushNamed(CustomerScreen.routeName);
+                          break;
                         default:
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('${_items[index].label} coming soon!'),
+                              content: Text(
+                                '${_items[index].label} coming soon!',
+                              ),
                               duration: const Duration(seconds: 1),
                             ),
                           );
@@ -130,9 +168,23 @@ class AppDrawer extends StatelessWidget {
               border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-              leading: const Icon(Icons.logout, color: Colors.redAccent, size: 22),
-              title: const Text('Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500, fontSize: 14)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 4,
+              ),
+              leading: const Icon(
+                Icons.logout,
+                color: Colors.redAccent,
+                size: 22,
+              ),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
               onTap: () {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   SignInPage.routeName,

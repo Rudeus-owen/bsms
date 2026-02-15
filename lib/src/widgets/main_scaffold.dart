@@ -8,6 +8,8 @@ class MainScaffold extends StatefulWidget {
   final List<Widget>? actions;
   final Widget? floatingActionButton;
 
+  final int selectedIndex;
+
   const MainScaffold({
     super.key,
     required this.title,
@@ -15,6 +17,7 @@ class MainScaffold extends StatefulWidget {
     this.actions,
     this.floatingActionButton,
     this.showBackButton = false,
+    this.selectedIndex = 0,
   });
 
   @override
@@ -22,7 +25,13 @@ class MainScaffold extends StatefulWidget {
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+  }
 
   // Menu labels matching drawer items
   static const List<String> _screenTitles = [
@@ -39,7 +48,6 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.white,
