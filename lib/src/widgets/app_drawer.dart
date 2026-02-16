@@ -1,4 +1,4 @@
-import 'package:bsms/src/utils/build_context.dart';
+import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 import 'package:bsms/src/views/employee_screen.dart';
@@ -15,7 +15,7 @@ class AppDrawer extends StatelessWidget {
   });
 
   static final List<_DrawerItem> _items = [
-    _DrawerItem(icon: Icons.dashboard_outlined, label: 'Overview',),
+    _DrawerItem(icon: Icons.dashboard_outlined, label: 'Overview'),
     _DrawerItem(icon: Icons.receipt_long_outlined, label: 'Services Record'),
     _DrawerItem(icon: Icons.people_outlined, label: 'Employees'),
     _DrawerItem(icon: Icons.shopping_bag_outlined, label: 'Beauty Products'),
@@ -96,6 +96,7 @@ class AppDrawer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: _items.length,
               itemBuilder: (context, index) {
+                debugPrint('selectedIndex >> $selectedIndex');
                 final item = _items[index];
                 final isSelected = selectedIndex == index;
                 return Container(
@@ -104,9 +105,10 @@ class AppDrawer extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary.withAlpha(20)
-                        : Colors.transparent,
+                    color:
+                        isSelected
+                            ? AppColors.primary.withAlpha(20)
+                            : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
@@ -119,9 +121,8 @@ class AppDrawer extends StatelessWidget {
                       item.label,
                       style: TextStyle(
                         color: isSelected ? AppColors.primary : AppColors.black,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
                         fontSize: 14,
                       ),
                     ),
@@ -140,13 +141,18 @@ class AppDrawer extends StatelessWidget {
                         case 0:
                           nav.pushNamed(OverviewScreen.routeName);
                           break;
+                        case 1:
+                          nav.pushNamed(ServiceRecordScreen.routeName);
+                          break;
                         case 2:
                           nav.pushNamed(EmployeeScreen.routeName);
                           break;
                         default:
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('${_items[index].label} coming soon!'),
+                              content: Text(
+                                '${_items[index].label} coming soon!',
+                              ),
                               duration: const Duration(seconds: 1),
                             ),
                           );

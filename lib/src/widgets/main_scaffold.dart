@@ -41,21 +41,24 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.white,
         surfaceTintColor: AppColors.white,
         elevation: 0.5,
         shadowColor: Colors.grey.withAlpha(80),
-        leading: widget.showBackButton
-            ? BackButton(color: AppColors.primary)
-            : Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, color: AppColors.primary),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+        leading:
+            widget.showBackButton
+                ? BackButton(color: AppColors.primary)
+                : Builder(
+                  builder:
+                      (context) => IconButton(
+                        icon: const Icon(Icons.menu, color: AppColors.primary),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                      ),
                 ),
-              ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -69,7 +72,7 @@ class _MainScaffoldState extends State<MainScaffold> {
               ),
             ),
             Text(
-              '${AppConfig.shared.appVersion}',
+              AppConfig.shared.appVersion,
               style: const TextStyle(
                 color: AppColors.grey,
                 fontSize: 11,
@@ -88,18 +91,20 @@ class _MainScaffoldState extends State<MainScaffold> {
         selectedIndex: _selectedIndex,
         onItemSelected: (index) {
           setState(() => _selectedIndex = index);
-          switch (index) {
-            case 0:
-              Navigator.of(context).pushReplacementNamed(
-                OverviewScreen.routeName,
-              );
-              break;
-            case 1:
-              Navigator.of(context).pushReplacementNamed(
-                ServiceRecordScreen.routeName,
-              );
-              break;
-          }
+          debugPrint('index >> $index');
+          debugPrint('selected index >> $index');
+          // switch (index) {
+          // case 0:
+          //   Navigator.of(
+          //     context,
+          //   ).pushReplacementNamed(OverviewScreen.routeName);
+          //   break;
+          // case 1:
+          //   Navigator.of(
+          //     context,
+          //   ).pushReplacementNamed(ServiceRecordScreen.routeName);
+          //   break;
+          // }
         },
       ),
       body: widget.body,
