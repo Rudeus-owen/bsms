@@ -11,3 +11,4 @@ export 'src/views/employee_edit_screen.dart';
 export 'src/utils/summary_card.dart';
 export 'src/utils/data_filter_bar.dart';
 export 'src/utils/dynamic_data_table.dart';
+export 'src/views/customer_screen.dart';

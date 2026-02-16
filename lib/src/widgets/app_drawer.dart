@@ -105,10 +105,9 @@ class AppDrawer extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? AppColors.primary.withAlpha(20)
-                            : Colors.transparent,
+                    color: isSelected
+                        ? AppColors.primary.withAlpha(20)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
@@ -121,8 +120,9 @@ class AppDrawer extends StatelessWidget {
                       item.label,
                       style: TextStyle(
                         color: isSelected ? AppColors.primary : AppColors.black,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                         fontSize: 14,
                       ),
                     ),
@@ -146,6 +146,9 @@ class AppDrawer extends StatelessWidget {
                           break;
                         case 2:
                           nav.pushNamed(EmployeeScreen.routeName);
+                          break;
+                        case 5:
+                          nav.pushNamed(CustomerScreen.routeName);
                           break;
                         default:
                           messenger.showSnackBar(

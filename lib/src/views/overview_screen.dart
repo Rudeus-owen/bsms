@@ -9,6 +9,7 @@ class OverviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MainScaffold(
       title: 'Overview',
+      selectedIndex: 0,
       body: Center(
         child: Text(
           'Hello World!',

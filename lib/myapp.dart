@@ -32,6 +32,8 @@ class MyApp extends StatelessWidget {
                 return const EmployeeScreen();
               case EmployeeEditScreen.routeName:
                 return const EmployeeEditScreen();
+              case CustomerScreen.routeName:
+                return const CustomerScreen();
               default:
                 return const SignInPage();
             }
