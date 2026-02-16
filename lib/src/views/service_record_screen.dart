@@ -1,4 +1,5 @@
 import 'package:bsms/exports.dart';
+import 'package:bsms/src/views/service_record_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/src/widgets/appointment_card.dart';
 import 'package:bsms/src/widgets/appointment_table.dart';
@@ -16,11 +17,67 @@ class _ServiceRecordScreenState extends State<ServiceRecordScreen> {
   // Using demo data from AppointmentModel
   final List<AppointmentModel> _records = AppointmentModel.demoData;
   bool _showFilters = false;
+  int _currentPage = 1;
+  final int _itemsPerPage = 10;
+  String _searchQuery = '';
+
+  List<Map<String, dynamic>> get _paginatedServiceRecords {
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = startIndex + _itemsPerPage;
+    if (startIndex >= _filteredServiceRecords.length) return [];
+    return _filteredServiceRecords.sublist(
+      startIndex,
+      endIndex.clamp(0, _filteredServiceRecords.length),
+    );
+  }
+
+  final List<Map<String, dynamic>> _allServiceRecords = [
+    {
+      'date': '15-01-2026',
+      'client': 'Emma Wilson',
+      'service': 'Hair Coloring',
+      'employee': 'Sarah Johnson',
+      'duration': '2h',
+      'price': 140.00,
+      'payment': 'paid',
+    },
+    {
+      'date': '15-01-2026',
+      'client': 'Olivia Brown',
+      'service': 'Manicure & Predicure',
+      'employee': 'Maria Garcia',
+      'duration': '1h 30mins',
+      'price': 120.00,
+      'payment': 'paid',
+    },
+    {
+      'date': '14-01-2026',
+      'client': 'Sophia Davis',
+      'service': 'Facial Treatment',
+      'employee': 'Lisa Chen',
+      'duration': '1h',
+      'price': 130.00,
+      'payment': 'paid',
+    },
+  ];
+
+  List<Map<String, dynamic>> get _filteredServiceRecords {
+    return _allServiceRecords.where((sr) {
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final name = (sr['service'] as String).toLowerCase();
+        final role = (sr['client'] as String).toLowerCase();
+        if (!name.contains(q) && !role.contains(q)) return false;
+      }
+      return true;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
       title: 'Services Record',
+      selectedIndex: 1,
       actions: [
         IconButton(
           onPressed: () {
@@ -46,31 +103,19 @@ class _ServiceRecordScreenState extends State<ServiceRecordScreen> {
                   _buildFilters(isWide),
                   const SizedBox(height: 24),
                 ],
-                if (isWide)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(10), // 0.04 * 255 ~= 10
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: AppointmentTable(appointments: _records),
-                  )
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _records.length,
-                    itemBuilder: (context, index) {
-                      return AppointmentCard(appointment: _records[index]);
-                    },
-                  ),
+
+                DynamicDataTable(
+                  data: _paginatedServiceRecords,
+                  onRowTap: (row) {
+                    Navigator.pushNamed(
+                      context,
+                      ServiceRecordDetailScreen.routeName,
+                      arguments: row,
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 12),
               ],
             ),
           );

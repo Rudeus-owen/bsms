@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:bsms/src/views/service_list_screen.dart';
+import 'package:bsms/src/views/service_record_detail_screen.dart';
 import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
@@ -28,6 +30,10 @@ class MyApp extends StatelessWidget {
                 return const OverviewScreen();
               case ServiceRecordScreen.routeName:
                 return const ServiceRecordScreen();
+              case ServiceRecordDetailScreen.routeName:
+                return const ServiceRecordDetailScreen();
+              case ServiceListScreen.routeName:
+                return const ServiceListScreen();
               case EmployeeScreen.routeName:
                 return const EmployeeScreen();
               case EmployeeEditScreen.routeName:

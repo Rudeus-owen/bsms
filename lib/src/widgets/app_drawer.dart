@@ -1,3 +1,4 @@
+import 'package:bsms/src/views/service_list_screen.dart';
 import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
@@ -96,7 +97,6 @@ class AppDrawer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: _items.length,
               itemBuilder: (context, index) {
-                debugPrint('selectedIndex >> $selectedIndex');
                 final item = _items[index];
                 final isSelected = selectedIndex == index;
                 return Container(
@@ -149,6 +149,9 @@ class AppDrawer extends StatelessWidget {
                           break;
                         case 5:
                           nav.pushNamed(CustomerScreen.routeName);
+                          break;
+                        case 7:
+                          nav.pushNamed(ServiceListScreen.routeName);
                           break;
                         default:
                           messenger.showSnackBar(

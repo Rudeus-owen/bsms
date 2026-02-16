@@ -100,8 +100,6 @@ class _MainScaffoldState extends State<MainScaffold> {
         selectedIndex: _selectedIndex,
         onItemSelected: (index) {
           setState(() => _selectedIndex = index);
-          debugPrint('index >> $index');
-          debugPrint('selected index >> $index');
           // switch (index) {
           // case 0:
           //   Navigator.of(
