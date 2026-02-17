@@ -1,4 +1,5 @@
 import 'package:bsms/src/utils/build_context.dart';
+import 'package:bsms/src/views/language_screen.dart';
 import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
@@ -56,18 +57,16 @@ class _MainScaffoldState extends State<MainScaffold> {
         surfaceTintColor: AppColors.white,
         elevation: 0.5,
         shadowColor: Colors.grey.withAlpha(80),
-        leading:
-            widget.showBackButton
-                ? BackButton(color: AppColors.primary)
-                : Builder(
-                  builder:
-                      (context) => IconButton(
-                        icon: const Icon(Icons.menu, color: AppColors.primary),
-                        onPressed: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                      ),
+        leading: widget.showBackButton
+            ? BackButton(color: AppColors.primary)
+            : Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, color: AppColors.primary),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
                 ),
+              ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -92,6 +91,12 @@ class _MainScaffoldState extends State<MainScaffold> {
         ),
         actions: [
           ...?widget.actions,
+          IconButton(
+            onPressed: () {
+              context.toNextScreen(const LanguageScreen());
+            },
+            icon: const Icon(Icons.language, color: Colors.blue,),
+          ),
           const ConnectivityIndicator(),
           const SizedBox(width: 16),
         ],

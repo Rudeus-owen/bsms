@@ -1,28 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bsms/src/localization/demolocalization.dart';
 import 'package:bsms/src/utils/size_config.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 
 extension RouterContext on BuildContext {
-  // String getTranslated(String key) {
-  //   return DemoLocalization.of(this)!.translate(key);
-  // }
-
-  // Future toNextScreenAnimation(
-  //     {required Widget nextScreen, PageTransitionType? type}) {
-  //   return Navigator.push(
-  //     this,
-  //     PageTransition(
-  //       type: type ?? PageTransitionType.leftToRight,
-  //       duration: Duration(milliseconds: 200),
-  //       reverseDuration: Duration(milliseconds: 200),
-  //       curve: Curves.easeInOut,
-  //       child: nextScreen,
-  //     ),
-  //   );
-  // }
+  String getTranslated(String key) {
+    return DemoLocalization.of(this)!.translate(key);
+  }
 
   Future toPushAndRemoveUntilAnimation(
       {required Widget nextScreen, PageTransitionType? type}) {
