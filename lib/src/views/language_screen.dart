@@ -82,65 +82,73 @@ class _LanguageScreenState extends State<LanguageScreen> {
               child: Card(
                 elevation: 1,
                 shadowColor: Colors.grey,
-                child: RadioGroup(
-                  groupValue: chooseLanguage,
-                  onChanged: (value) {
-                    setState(() {
-                      chooseLanguage = value;
-                      _changeLanguage(chooseLanguage ?? 'en');
-                      Future.delayed(Duration(milliseconds: 200));
-                      debugPrint("value=>$value");
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: Text(
-                            context.getTranslated("english"),
-                            style: TextStyle(
-                              fontSize: width > 600 ? 18 : 15,
-                              color: chooseLanguage == "en"
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          leading: Image.asset(
-                            'assets/icons/en_lang_icon.png',
-                            height: height > 1000 ? 40 : 30,
-                            width: width > 600 ? 40 : 30,
-                          ),
-                          trailing: Radio(
-                            value: "en",
-                            activeColor: Theme.of(context).primaryColorDark,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          context.getTranslated("english"),
+                          style: TextStyle(
+                            fontSize: width > 600 ? 18 : 15,
+                            color: chooseLanguage == "en"
+                                ? Theme.of(context).primaryColor
+                                : Colors.black,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(height: height > 1000 ? 12 : 18),
-                        ListTile(
-                          title: Text(
-                            context.getTranslated("myanmar"),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: width > 600 ? 18 : 15,
-                              color: chooseLanguage == "my"
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.black,
-                            ),
-                          ),
-                          leading: Image.asset(
-                            'assets/icons/my_lang_icon.png',
-                            height: height > 1000 ? 40 : 30,
-                            width: width > 600 ? 40 : 30,
-                          ),
-                          trailing: Radio(
-                            value: "my",
-                            activeColor: Theme.of(context).primaryColorDark,
+                        leading: Image.asset(
+                          'assets/icons/en_lang_icon.png',
+                          height: height > 1000 ? 40 : 30,
+                          width: width > 600 ? 40 : 30,
+                        ),
+                        trailing: Radio<String>(
+                          value: "en",
+                          groupValue: chooseLanguage,
+                          onChanged: (value) {
+                            setState(() {
+                              chooseLanguage = value;
+                              _changeLanguage(chooseLanguage ?? 'en');
+                              debugPrint("value=>$value");
+                            });
+                          },
+                          activeColor: Theme.of(context).primaryColorDark,
+                        ),
+                      ),
+                      SizedBox(height: height > 1000 ? 12 : 18),
+                      ListTile(
+                        title: Text(
+                          context.getTranslated("myanmar"),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: width > 600 ? 18 : 15,
+                            color: chooseLanguage == "my"
+                                ? Theme.of(context).primaryColor
+                                : Colors.black,
                           ),
                         ),
-                      ],
-                    ),
+                        leading: Image.asset(
+                          'assets/icons/my_lang_icon.png',
+                          height: height > 1000 ? 40 : 30,
+                          width: width > 600 ? 40 : 30,
+                        ),
+                        trailing: Radio<String>(
+                          value: "my",
+                          groupValue: chooseLanguage,
+                          onChanged: (value) {
+                            setState(() {
+                              chooseLanguage = value;
+                              _changeLanguage(chooseLanguage ?? 'en');
+                              debugPrint("value=>$value");
+                            });
+                          },
+                          activeColor: Theme.of(context).primaryColorDark,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
