@@ -1,3 +1,6 @@
+import 'package:bsms/src/utils/build_context.dart';
+import 'package:bsms/src/views/language_screen.dart';
+import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -59,7 +62,9 @@ class _MainScaffoldState extends State<MainScaffold> {
             : Builder(
                 builder: (context) => IconButton(
                   icon: const Icon(Icons.menu, color: AppColors.primary),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
                 ),
               ),
         title: Column(
@@ -75,7 +80,7 @@ class _MainScaffoldState extends State<MainScaffold> {
               ),
             ),
             Text(
-              '${AppConfig.shared.appVersion}',
+              AppConfig.shared.appVersion,
               style: const TextStyle(
                 color: AppColors.grey,
                 fontSize: 11,
@@ -86,13 +91,33 @@ class _MainScaffoldState extends State<MainScaffold> {
         ),
         actions: [
           ...?widget.actions,
+          IconButton(
+            onPressed: () {
+              context.toNextScreen(const LanguageScreen());
+            },
+            icon: const Icon(Icons.language, color: Colors.blue,),
+          ),
           const ConnectivityIndicator(),
           const SizedBox(width: 16),
         ],
       ),
       drawer: AppDrawer(
         selectedIndex: _selectedIndex,
-        onItemSelected: (index) => setState(() => _selectedIndex = index),
+        onItemSelected: (index) {
+          setState(() => _selectedIndex = index);
+          // switch (index) {
+          // case 0:
+          //   Navigator.of(
+          //     context,
+          //   ).pushReplacementNamed(OverviewScreen.routeName);
+          //   break;
+          // case 1:
+          //   Navigator.of(
+          //     context,
+          //   ).pushReplacementNamed(ServiceRecordScreen.routeName);
+          //   break;
+          // }
+        },
       ),
       body: widget.body,
       floatingActionButton: widget.floatingActionButton,

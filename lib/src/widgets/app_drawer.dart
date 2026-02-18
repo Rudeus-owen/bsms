@@ -1,3 +1,5 @@
+import 'package:bsms/src/views/service_list_screen.dart';
+import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -137,11 +139,17 @@ class AppDrawer extends StatelessWidget {
                         case 0:
                           nav.pushNamed(OverviewScreen.routeName);
                           break;
+                        case 1:
+                          nav.pushNamed(ServiceRecordScreen.routeName);
+                          break;
                         case 2:
                           nav.pushNamed(EmployeeScreen.routeName);
                           break;
                         case 5:
                           nav.pushNamed(CustomerScreen.routeName);
+                          break;
+                        case 7:
+                          nav.pushNamed(ServiceListScreen.routeName);
                           break;
                         default:
                           messenger.showSnackBar(
