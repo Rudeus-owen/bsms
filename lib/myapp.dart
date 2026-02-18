@@ -13,12 +13,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         scaffoldBackgroundColor: AppColors.scaffoldBg,
       ),
-      initialRoute: SignInPage.routeName,
+      initialRoute: SplashScreen.routeName,
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(
           settings: settings,
           builder: (context) {
             switch (settings.name) {
+              case SplashScreen.routeName:
+                return const SplashScreen();
               case SignInPage.routeName:
                 return const SignInPage();
               case OverviewScreen.routeName:

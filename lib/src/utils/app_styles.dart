@@ -23,7 +23,22 @@ class AppColors {
   static Color shadow = Colors.black.withAlpha(38);
 
   // Background particles (for FinisherBackground)
-  static const List<Color> particleColors = [primaryLight, primaryMuted, primaryDark];
+  static const List<Color> particleColors = [
+    primaryLight,
+    primaryMuted,
+    primaryDark,
+  ];
+
+  // Utility
+  static const Color inputFill = Color(0xFFFAFAFA);
+  static const Color border = Color(0xFFE8E8E8);
+  static const Color inputBorder = Color(0xFFEEEEEE);
+  static const Color warning = Colors.orange;
+  static Color warningBg = Colors.orange.shade50;
+  static Color warningIcon = Colors.orange.shade700;
+  static const Color error = Colors.red;
+  static Color errorLight = Colors.red.shade200;
+  static const Color success = Colors.green;
 }
 
 /// ─── App Font Sizes ────────────────────────────────────
@@ -104,4 +119,33 @@ class AppDecorations {
     borderRadius: BorderRadius.circular(14),
     borderSide: const BorderSide(color: AppColors.primary, width: 2),
   );
+}
+
+/// ─── App Sizes ─────────────────────────────────────────
+class AppSizes {
+  AppSizes._();
+
+  static const double p4 = 4.0;
+  static const double p8 = 8.0;
+  static const double p12 = 12.0;
+  static const double p16 = 16.0;
+  static const double p20 = 20.0;
+  static const double p24 = 24.0;
+  static const double p32 = 32.0;
+  static const double p40 = 40.0;
+  static const double p48 = 48.0;
+
+  static const double iconSmall = 20.0;
+  static const double iconMedium = 24.0;
+  static const double iconLarge = 28.0;
+}
+
+/// ─── App Radius ────────────────────────────────────────
+class AppRadius {
+  AppRadius._();
+
+  static final BorderRadius small = BorderRadius.circular(8);
+  static final BorderRadius medium = BorderRadius.circular(12);
+  static final BorderRadius large = BorderRadius.circular(16);
+  static final BorderRadius xl = BorderRadius.circular(28);
 }

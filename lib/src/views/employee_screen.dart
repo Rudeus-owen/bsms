@@ -16,301 +16,271 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   int _currentPage = 1;
   final int _itemsPerPage = 10;
 
-  List<Map<String, dynamic>> get _paginatedEmployees {
-    final startIndex = (_currentPage - 1) * _itemsPerPage;
-    final endIndex = startIndex + _itemsPerPage;
-    if (startIndex >= _filteredEmployees.length) return [];
-    return _filteredEmployees.sublist(
-      startIndex,
-      endIndex.clamp(0, _filteredEmployees.length),
+  bool _isLoading = false;
+  List<Employee> _employees = [];
+  int _totalPages = 1;
+  int _totalCount = 0;
+
+  String? _branchId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBranchAndEmployees();
+  }
+
+  Future<void> _loadBranchAndEmployees() async {
+    _branchId = await ApiService.getBranchId();
+    if (_branchId == null) {
+      // Handle case where branch ID is missing (e.g. not logged in)
+      // For now, maybe just log it or show empty
+      print('DEBUG: Branch ID not found in storage');
+    }
+    _fetchEmployees();
+  }
+
+  Future<void> _fetchEmployees() async {
+    print('DEBUG: _fetchEmployees called. Page: $_currentPage');
+    setState(() => _isLoading = true);
+
+    if (_selectedStatus == 'Active') {}
+
+    final result = await EmployeeService.getEmployees(
+      page: _currentPage,
+      limit: _itemsPerPage,
+      branchId: _branchId,
     );
+
+    print(
+      'DEBUG: Fetch result success: ${result['success']}, Total: ${result['total']}',
+    );
+
+    if (result['success'] == true) {
+      if (mounted) {
+        setState(() {
+          _employees = result['data'];
+          _totalCount = result['total'];
+          _totalPages = result['totalPages'];
+          _isLoading = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result['message'])));
+      }
+    }
   }
 
-  // ── Dummy data (swap with API later) ──────────────────────────────────
-  final List<Map<String, dynamic>> _allEmployees = [
-    {
-      'name': 'Sarah Johnson',
-      'phone': '09-123-4567',
-      'role': 'Senior Stylist',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2022-03-15',
-    },
-    {
-      'name': 'Maria Garcia',
-      'phone': '09-234-5678',
-      'role': 'Nail Technician',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2021-07-20',
-    },
-    {
-      'name': 'Lina Chen',
-      'phone': '09-345-6789',
-      'role': 'Hair Colorist',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2023-01-10',
-    },
-    {
-      'name': 'Aye Aye',
-      'phone': '09-456-7890',
-      'role': 'Junior Stylist',
-      'experience': 'Non-experienced',
-      'status': 'Active',
-      'joinDate': '2024-06-01',
-    },
-    {
-      'name': 'Zaw Win',
-      'phone': '09-567-8901',
-      'role': 'Receptionist',
-      'experience': 'Experienced',
-      'status': 'Inactive',
-      'joinDate': '2020-11-05',
-    },
-    {
-      'name': 'Hla Hla',
-      'phone': '09-678-9012',
-      'role': 'Trainee',
-      'experience': 'Non-experienced',
-      'status': 'Active',
-      'joinDate': '2024-12-01',
-    },
-    // Added more dummy data
-    {
-      'name': 'Kyaw Kyaw',
-      'phone': '09-789-0123',
-      'role': 'Barber',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2023-05-20',
-    },
-    {
-      'name': 'Su Su',
-      'phone': '09-890-1234',
-      'role': 'Makeup Artist',
-      'experience': 'Non-experienced',
-      'status': 'Active',
-      'joinDate': '2024-02-14',
-    },
-    {
-      'name': 'Aung Aung',
-      'phone': '09-901-2345',
-      'role': 'Senior Stylist',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2021-11-11',
-    },
-    {
-      'name': 'Mya Mya',
-      'phone': '09-012-3456',
-      'role': 'Nail Technician',
-      'experience': 'Experienced',
-      'status': 'Inactive',
-      'joinDate': '2022-08-08',
-    },
-    {
-      'name': 'Thida',
-      'phone': '09-123-4567',
-      'role': 'Receptionist',
-      'experience': 'Non-experienced',
-      'status': 'Active',
-      'joinDate': '2025-01-01',
-    },
-    {
-      'name': 'Bo Bo',
-      'phone': '09-234-5678',
-      'role': 'Security',
-      'experience': 'Experienced',
-      'status': 'Active',
-      'joinDate': '2020-01-01',
-    },
-  ];
+  List<Map<String, dynamic>> get _paginatedEmployees {
+    var filtered = _employees;
+    if (_selectedStatus != 'All Status') {
+      final bool isActive = _selectedStatus == 'Active';
+      filtered = filtered.where((e) => e.isActive == isActive).toList();
+    }
 
-  List<Map<String, dynamic>> get _filteredEmployees {
-    return _allEmployees.where((emp) {
-      if (_selectedStatus != 'All Status' && emp['status'] != _selectedStatus) {
-        return false;
-      }
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        final name = (emp['name'] as String).toLowerCase();
-        final role = (emp['role'] as String).toLowerCase();
-        if (!name.contains(q) && !role.contains(q)) return false;
-      }
-      return true;
-    }).toList();
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filtered = filtered
+          .where(
+            (e) =>
+                e.fullName.toLowerCase().contains(q) ||
+                e.roleName.toLowerCase().contains(q),
+          )
+          .toList();
+    }
+
+    return filtered
+        .map(
+          (e) => {
+            'name': e.fullName,
+            'phone': e.phone,
+            'role': e.roleName,
+            'experience': e.salary > 200000 ? 'Experienced' : 'Non-experienced',
+            'status': e.isActive ? 'Active' : 'Inactive',
+            'joinDate': e.createdAt.toIso8601String().split('T')[0],
+          },
+        )
+        .toList();
   }
 
-  int get _totalCount => _allEmployees.length;
-  int get _expCount =>
-      _allEmployees.where((e) => e['experience'] == 'Experienced').length;
-  int get _nonExpCount =>
-      _allEmployees.where((e) => e['experience'] == 'Non-experienced').length;
+  int get _expCount => _employees.where((e) => e.salary > 200000).length;
+  int get _nonExpCount => _employees.where((e) => e.salary <= 200000).length;
 
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
       title: 'Employees',
       selectedIndex: 2,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Header: subtitle + add button ────────────────────
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Manage your salon team members',
-                    style: TextStyle(fontSize: 13, color: AppColors.grey),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Header: subtitle + add button ────────────────────
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Manage your salon team members',
+                          style: TextStyle(fontSize: 13, color: AppColors.grey),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: 34,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              EmployeeEditScreen.routeName,
+                            ).then((_) => _fetchEmployees());
+                          },
+                          icon: const Icon(Icons.add, size: 15),
+                          label: const Text('New Employee'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 34,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
+
+                  const SizedBox(height: 12),
+
+                  // ── Summary Cards (3‑across, fits any width) ─────────
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.people,
+                            iconColor: Colors.blue.shade700,
+                            iconBgColor: Colors.blue.shade50,
+                            count: _totalCount,
+                            label: 'Total',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.person,
+                            iconColor: Colors.green.shade700,
+                            iconBgColor: Colors.green.shade50,
+                            count: _expCount,
+                            label: 'Experienced',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SummaryCard(
+                            icon: Icons.person_outline,
+                            iconColor: Colors.orange.shade700,
+                            iconBgColor: Colors.orange.shade50,
+                            count: _nonExpCount,
+                            label: 'Non-Experience',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Filters ──────────────────────────────────────────
+                  DataFilterBar(
+                    selectedDate: _selectedDate,
+                    onDateChanged: (d) => setState(() {
+                      _selectedDate = d;
+                      _currentPage = 1;
+                    }),
+                    statusOptions: const ['All Status', 'Active', 'Inactive'],
+                    selectedStatus: _selectedStatus,
+                    onStatusChanged: (s) => setState(() {
+                      _selectedStatus = s;
+                      _currentPage = 1;
+                    }),
+                    searchHint: 'Search employee...',
+                    onSearchChanged: (q) => setState(() {
+                      _searchQuery = q;
+                      _currentPage = 1;
+                    }),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Data ─────────────────────────────────────────────
+                  // ── Data ─────────────────────────────────────────────
+                  DynamicDataTable(
+                    data: _paginatedEmployees,
+                    onRowTap: (row) {
                       Navigator.pushNamed(
                         context,
                         EmployeeEditScreen.routeName,
-                      );
+                        arguments: row['original'],
+                      ).then((_) => _fetchEmployees());
                     },
-                    icon: const Icon(Icons.add, size: 15),
-                    label: const Text('New Employee'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      elevation: 0,
-                    ),
                   ),
-                ),
-              ],
-            ),
 
-            const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-            // ── Summary Cards (3‑across, fits any width) ─────────
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.people,
-                      iconColor: Colors.blue.shade700,
-                      iconBgColor: Colors.blue.shade50,
-                      count: _totalCount,
-                      label: 'Total',
+                  // ── Pagination Controls ──────────────────────────────
+                  if (_employees.isNotEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Page $_currentPage of $_totalPages',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.grey,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left),
+                          onPressed: _currentPage > 1
+                              ? () {
+                                  setState(() => _currentPage--);
+                                  _fetchEmployees();
+                                }
+                              : null,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right),
+                          onPressed: _currentPage < _totalPages
+                              ? () {
+                                  setState(() => _currentPage++);
+                                  _fetchEmployees();
+                                }
+                              : null,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.person,
-                      iconColor: Colors.green.shade700,
-                      iconBgColor: Colors.green.shade50,
-                      count: _expCount,
-                      label: 'Experienced',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.person_outline,
-                      iconColor: Colors.orange.shade700,
-                      iconBgColor: Colors.orange.shade50,
-                      count: _nonExpCount,
-                      label: 'Non-Experience',
-                    ),
-                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            // ── Filters ──────────────────────────────────────────
-            DataFilterBar(
-              selectedDate: _selectedDate,
-              onDateChanged: (d) => setState(() {
-                _selectedDate = d;
-                _currentPage = 1;
-              }),
-              statusOptions: const ['All Status', 'Active', 'Inactive'],
-              selectedStatus: _selectedStatus,
-              onStatusChanged: (s) => setState(() {
-                _selectedStatus = s;
-                _currentPage = 1;
-              }),
-              searchHint: 'Search employee...',
-              onSearchChanged: (q) => setState(() {
-                _searchQuery = q;
-                _currentPage = 1;
-              }),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Data ─────────────────────────────────────────────
-            // ── Data ─────────────────────────────────────────────
-            DynamicDataTable(
-              data: _paginatedEmployees,
-              onRowTap: (row) {
-                Navigator.pushNamed(
-                  context,
-                  EmployeeEditScreen.routeName,
-                  arguments: row,
-                );
-              },
-            ),
-
-            const SizedBox(height: 12),
-
-            // ── Pagination Controls ──────────────────────────────
-            if (_filteredEmployees.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Page $_currentPage of ${(_filteredEmployees.length / _itemsPerPage).ceil()}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: _currentPage > 1
-                        ? () => setState(() => _currentPage--)
-                        : null,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right),
-                    onPressed:
-                        _currentPage <
-                            (_filteredEmployees.length / _itemsPerPage).ceil()
-                        ? () => setState(() => _currentPage++)
-                        : null,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
     );
   }
 }

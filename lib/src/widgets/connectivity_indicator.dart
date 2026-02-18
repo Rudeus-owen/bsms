@@ -31,10 +31,15 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
     Connectivity().checkConnectivity().then(_onNetworkChanged);
 
     // Listen for changes (fires instantly on toggle)
-    _subscription = Connectivity().onConnectivityChanged.listen(_onNetworkChanged);
+    _subscription = Connectivity().onConnectivityChanged.listen(
+      _onNetworkChanged,
+    );
 
     // Background reachability every 15s
-    _periodicCheck = Timer.periodic(const Duration(seconds: 15), (_) => _pingCheck());
+    _periodicCheck = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _pingCheck(),
+    );
   }
 
   void _onNetworkChanged(List<ConnectivityResult> results) {
@@ -54,20 +59,22 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
     }
 
     _setStatus(true, type);
-    
-    _pingCheck(); 
+
+    _pingCheck();
   }
 
   Future<void> _pingCheck() async {
     if (!_isConnected) return;
 
     try {
-      final result = await InternetAddress.lookup('google.com');
+      final result = await InternetAddress.lookup(
+        'bsms-backend-wduj.onrender.com',
+      );
       if (!mounted) return;
-      
+
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-         // Confirmed online
-         if (!_isConnected) _setStatus(true, _label);
+        // Confirmed online
+        if (!_isConnected) _setStatus(true, _label);
       }
     } catch (_) {
       if (!mounted) return;
@@ -99,10 +106,16 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
       SnackBar(
         content: Row(
           children: [
-            Icon(online ? Icons.wifi : Icons.wifi_off, color: Colors.white, size: 18),
+            Icon(
+              online ? Icons.wifi : Icons.wifi_off,
+              color: Colors.white,
+              size: 18,
+            ),
             const SizedBox(width: 10),
-            Text(online ? 'Back online' : 'You are offline',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              online ? 'Back online' : 'You are offline',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ],
         ),
         backgroundColor: online ? const Color(0xFF22c55e) : Colors.redAccent,
@@ -129,7 +142,9 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, _) {
-        final opacity = _isConnected ? 1.0 : 0.5 + (_pulseController.value * 0.5);
+        final opacity = _isConnected
+            ? 1.0
+            : 0.5 + (_pulseController.value * 0.5);
         return GestureDetector(
           onTap: _pingCheck,
           child: Opacity(
@@ -144,10 +159,20 @@ class _ConnectivityIndicatorState extends State<ConnectivityIndicator>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(_isConnected ? Icons.wifi : Icons.wifi_off, size: 14, color: color),
+                  Icon(
+                    _isConnected ? Icons.wifi : Icons.wifi_off,
+                    size: 14,
+                    color: color,
+                  ),
                   const SizedBox(width: 5),
-                  Text(_label,
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+                  Text(
+                    _label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -16,6 +16,7 @@ class _SignInPageState extends State<SignInPage> {
   final _emailPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,16 +34,16 @@ class _SignInPageState extends State<SignInPage> {
           // Native animated background
           const Positioned.fill(child: FinisherBackground()),
 
-            // Login Card On Top
-            Center(
-              child: SingleChildScrollView(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  margin: const EdgeInsets.all(24),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 32,
-                  ),
+          // Login Card On Top
+          Center(
+            child: SingleChildScrollView(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
                 decoration: AppDecorations.card,
                 child: Form(
                   key: _formKey,
@@ -155,9 +156,35 @@ class _SignInPageState extends State<SignInPage> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              Navigator.of(context).pushReplacementNamed(
-                                OverviewScreen.routeName,
-                              );
+                              setState(() {
+                                _isLoading = true;
+                              });
+
+                              ApiAuth.login(
+                                _emailPhoneController.text,
+                                _passwordController.text,
+                              ).then((result) {
+                                if (!mounted) return;
+
+                                setState(() {
+                                  _isLoading = false;
+                                });
+
+                                if (result['success']) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                    OverviewScreen.routeName,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        result['message'] ?? 'Login failed',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              });
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -168,10 +195,19 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             elevation: 4,
                           ),
-                          child: const Text(
-                            "Sign In",
-                            style: AppTextStyles.button,
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  "Sign In",
+                                  style: AppTextStyles.button,
+                                ),
                         ),
                       ),
                     ],

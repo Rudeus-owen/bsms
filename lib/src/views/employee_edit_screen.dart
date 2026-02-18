@@ -13,63 +13,104 @@ class EmployeeEditScreen extends StatefulWidget {
 
 class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _roleController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _salaryController = TextEditingController();
+  final _commissionController = TextEditingController();
   final _joinDateController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   // State variables
   String? _experience;
   String? _status;
+  int _role = 2; // Default to Employee (2)
   bool _isInit = true;
   bool _isEditMode = false;
+  String? _employeeId;
+  bool _isLoading = false;
 
   bool _hasChanges = false;
+
+  // Hardcoded branch ID
+  String? _branchId;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null) {
+      _loadBranchId();
+      final args = ModalRoute.of(context)?.settings.arguments;
+      // Args can be Employee object now
+      if (args is Employee) {
         _isEditMode = true;
+        _employeeId = args.id;
+        _nameController.text = args.fullName;
+        _phoneController.text = args.phone;
+        _emailController.text = args.email;
+        _role = args.role;
+        _salaryController.text = args.salary.toString();
+        _commissionController.text = args.commissionRate.toString();
+        _joinDateController.text = DateFormat(
+          'yyyy-MM-dd',
+        ).format(args.createdAt);
+
+        // Map API data to UI-only fields if possible, or sets defaults
+        _experience = args.salary > 200000 ? 'Experienced' : 'Non-experienced';
+        _status = args.isActive ? 'Active' : 'Inactive';
+      } else if (args is Map<String, dynamic>) {
+        // Fallback for Map arguments if any
+        _isEditMode = true;
+        _employeeId = args['id'];
         _nameController.text = args['name'] ?? '';
         _phoneController.text = args['phone'] ?? '';
-        _roleController.text = args['role'] ?? '';
-        _joinDateController.text = args['joinDate'] ?? '';
-        _experience = args['experience'];
-        _status = args['status'];
+        // ... other fields
       } else {
         // Defaults for create mode
         _status = 'Active';
         _experience = 'Non-experienced';
-        _joinDateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        _joinDateController.text = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.now());
       }
       _isInit = false;
-      
+
       // Listen for changes
       void onChange() {
         if (!_hasChanges) setState(() => _hasChanges = true);
       }
+
       _nameController.addListener(onChange);
       _phoneController.addListener(onChange);
-      _roleController.addListener(onChange);
+      _emailController.addListener(onChange);
+      _salaryController.addListener(onChange);
+      _commissionController.addListener(onChange);
       _joinDateController.addListener(onChange);
+      _passwordController.addListener(onChange);
     }
+  }
+
+  Future<void> _loadBranchId() async {
+    final branchId = await ApiService.getBranchId();
+    setState(() {
+      _branchId = branchId;
+    });
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _roleController.dispose();
+    _emailController.dispose();
+    _salaryController.dispose();
+    _commissionController.dispose();
     _joinDateController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  // ... (date picker logic skipped for brevity, assumed unchanged) ...
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -97,50 +138,6 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     }
   }
 
-  Future<bool> _onWillPop() async {
-    if (!_hasChanges) return true;
-
-    final shouldPop = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Unsaved Changes'),
-        content: Text(
-            'Do you want to save changes and ${_isEditMode ? 'edit' : 'create'}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Cancel
-            child: const Text('Cancel', style: TextStyle(color: AppColors.grey)),
-          ),
-          TextButton(
-            onPressed: () {
-               Navigator.of(context).pop(true); // Pop dialog, then...
-               // We handle the "Save & Exit" manually below, so return true means discard.
-               // Wait, user wants "Save and ...". 
-               // Standard pattern: 
-               // "Discard" -> pops true. 
-               // "Save" -> calls save, then pops true.
-               // "Cancel" -> pops false.
-            }, 
-            child: const Text('Discard', style: TextStyle(color: Colors.red)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            onPressed: () {
-               _saveForm(); // This will pop if valid
-               // We need to return false to the WillPopScope because _saveForm handles navigation
-            }, 
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-    
-    // Simplification for the "Discard" case only:
-    // If we clicked Discard, we return true.
-    return shouldPop ?? false;
-  }
-  
-  // Refined _onWillPop to match User Request accurately
   Future<bool> _handlePopScope() async {
     if (!_hasChanges) return true;
 
@@ -148,7 +145,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       context: context,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -162,28 +159,31 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: AppColors.warningBg,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.warning_amber_rounded,
-                          size: 28, color: Colors.orange.shade700),
+                      child: Icon(
+                        Icons.warning_amber_rounded,
+                        size: 28,
+                        color: AppColors.warningIcon,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSizes.p16),
                     const Text(
                       'Unsaved Changes',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: AppFontSizes.xl,
                         fontWeight: FontWeight.bold,
                         color: AppColors.black,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSizes.p8),
                     const Text(
                       'You have unsaved changes. Are you sure you want to leave without saving?',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: AppColors.grey, height: 1.5),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSizes.p24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -192,27 +192,31 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                           backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           elevation: 0,
                         ),
                         child: Text(
                           _isEditMode ? 'Save & Edit' : 'Save & Create',
                           style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                            color: AppColors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSizes.p8),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop('discard'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: BorderSide(color: Colors.red.shade200),
+                          side: BorderSide(color: AppColors.errorLight),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          foregroundColor: Colors.red,
+                            borderRadius: AppRadius.small,
+                          ),
+                          foregroundColor: AppColors.error,
                         ),
                         child: const Text('Discard Changes'),
                       ),
@@ -237,37 +241,66 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     if (result == 'discard') return true;
     if (result == 'save') {
       _saveForm();
-      return false; // _saveForm handles the pop
+      return false;
     }
-    return false; // Cancel
+    return false;
   }
 
-  void _saveForm() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Implement API call
-      final formData = {
-        'name': _nameController.text,
-        'phone': _phoneController.text,
-        'role': _roleController.text,
-        'experience': _experience,
-        'status': _status,
-        'joinDate': _joinDateController.text,
-      };
-      
-      print('Form Data: $formData');
-      Navigator.of(context).pop(); // Exit screen
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_isEditMode ? 'Employee updated!' : 'Employee created!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+  Future<void> _saveForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final Map<String, dynamic> data = {
+      if (_branchId != null) 'branch_id': _branchId,
+      'full_name': _nameController.text,
+      'email': _emailController.text,
+      'phone': _phoneController.text,
+      if (!_isEditMode) 'password': _passwordController.text,
+      'role': _role, // 1: admin, 2: employee, 3: receptionist
+      'salary': (double.tryParse(_salaryController.text) ?? 0).toInt(),
+      'commission_rate': double.tryParse(_commissionController.text) ?? 0.0,
+      'is_active': _status == 'Active',
+      'photo_url': null,
+    };
+
+    if (_isEditMode) {
+      data['id'] = _employeeId;
+    }
+
+    Map<String, dynamic> result;
+    if (_isEditMode) {
+      result = await EmployeeService.updateEmployee(data);
+    } else {
+      result = await EmployeeService.createEmployee(data);
+    }
+
+    setState(() => _isLoading = false);
+
+    if (mounted) {
+      if (result['success'] == true) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isEditMode ? 'Employee updated!' : 'Employee created!',
+            ),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Operation failed'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // PopScope replaces WillPopScope
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -280,196 +313,325 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       child: MainScaffold(
         showBackButton: true,
         title: _isEditMode ? 'Edit Employee' : 'New Employee',
-      body: SingleChildScrollView(
-        // Reduced padding for mobile responsiveness
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
-            // Reduced internal padding
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE8E8E8)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                   Text(
-                    _isEditMode ? 'Update Details' : 'Employee Details',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSizes.p16),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    padding: const EdgeInsets.all(AppSizes.p20),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: AppRadius.large,
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            _isEditMode ? 'Update Details' : 'Employee Details',
+                            style: const TextStyle(
+                              fontSize: AppFontSizes.xl,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.p24),
+
+                          // Name
+                          _buildLabel('Full Name'),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: _inputDecoration(
+                              'Enter full name',
+                              Icons.person_outline,
+                            ),
+                            validator: (v) => v?.isNotEmpty == true
+                                ? null
+                                : 'Name is required',
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Email
+                          _buildLabel('Email'),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: _inputDecoration(
+                              'Enter email',
+                              Icons.email_outlined,
+                            ),
+                            validator: (v) => v?.isNotEmpty == true
+                                ? null
+                                : 'Email is required',
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Phone
+                          _buildLabel('Phone Number'),
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: _inputDecoration(
+                              '09-XXX-XXXX',
+                              Icons.phone_outlined,
+                            ),
+                            validator: (v) => v?.isNotEmpty == true
+                                ? null
+                                : 'Phone is required',
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Password (Create Mode Only)
+                          if (!_isEditMode) ...[
+                            _buildLabel('Password'),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: _inputDecoration(
+                                'Enter password',
+                                Icons.lock_outline,
+                              ),
+                              validator: (v) => v?.isNotEmpty == true
+                                  ? null
+                                  : 'Password is required',
+                            ),
+                            const SizedBox(height: AppSizes.p20),
+                          ],
+
+                          // Job Role (Dropdown for API role int)
+                          _buildLabel('Job Role'),
+                          DropdownButtonFormField<int>(
+                            value: _role,
+                            isExpanded: true,
+                            items: [
+                              DropdownMenuItem(value: 1, child: Text('Admin')),
+                              DropdownMenuItem(
+                                value: 2,
+                                child: Text('Employee'),
+                              ),
+                              DropdownMenuItem(
+                                value: 3,
+                                child: Text('Receptionist'),
+                              ),
+                            ],
+                            onChanged: (v) => setState(() {
+                              _role = v ?? 2;
+                              _hasChanges = true;
+                            }),
+                            decoration: _inputDecoration(
+                              '',
+                              Icons.work_outline,
+                            ),
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Salary & Commission
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Salary'),
+                                    TextFormField(
+                                      controller: _salaryController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: _inputDecoration(
+                                        '0.0',
+                                        Icons.attach_money,
+                                      ),
+                                      validator: (v) => v?.isNotEmpty == true
+                                          ? null
+                                          : 'Required',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: AppSizes.p16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Commission (%)'),
+                                    TextFormField(
+                                      controller: _commissionController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: _inputDecoration(
+                                        '0.0',
+                                        Icons.percent,
+                                      ),
+                                      validator: (v) => v?.isNotEmpty == true
+                                          ? null
+                                          : 'Required',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Experience & Status (Visual / mapped to is_active)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Experience'),
+                                    DropdownButtonFormField<String>(
+                                      value: _experience,
+                                      isExpanded: true,
+                                      items: ['Experienced', 'Non-experienced']
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e,
+                                              child: Text(
+                                                e,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) => setState(() {
+                                        _experience = v;
+                                        _hasChanges = true;
+                                      }),
+                                      decoration: _inputDecoration(
+                                        '',
+                                        Icons.star_border,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: AppSizes.p16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Status'),
+                                    DropdownButtonFormField<String>(
+                                      value: _status,
+                                      isExpanded: true,
+                                      items: ['Active', 'Inactive']
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e,
+                                              child: Text(e),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) => setState(() {
+                                        _status = v;
+                                        _hasChanges = true;
+                                      }),
+                                      decoration: _inputDecoration(
+                                        '',
+                                        Icons.toggle_on_outlined,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSizes.p20),
+
+                          // Join Date (Read-only for now as API uses created_at)
+                          _buildLabel('Join Date'),
+                          TextFormField(
+                            controller: _joinDateController,
+                            readOnly: true,
+                            decoration: _inputDecoration(
+                              'Select date',
+                              Icons.calendar_today_outlined,
+                            ),
+                            // onTap: _selectDate, // Disable editing join date if mapped to created_at
+                          ),
+
+                          const SizedBox(height: AppSizes.p32),
+
+                          // Actions
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    Navigator.maybePop(context);
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: AppSizes.p16,
+                                    ),
+                                    side: const BorderSide(
+                                      color: AppColors.grey,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: AppRadius.small,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Cancel',
+                                    style: TextStyle(color: AppColors.grey),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: AppSizes.p16),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _saveForm,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: AppSizes.p16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: AppRadius.small,
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: Text(
+                                    _isEditMode
+                                        ? 'Update Employee'
+                                        : 'Create Employee',
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  
-                  // Name
-                  _buildLabel('Full Name'),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: _inputDecoration('Enter full name', Icons.person_outline),
-                    validator: (v) => v?.isNotEmpty == true ? null : 'Name is required',
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Phone
-                  _buildLabel('Phone Number'),
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: _inputDecoration('09-XXX-XXXX', Icons.phone_outlined),
-                    validator: (v) => v?.isNotEmpty == true ? null : 'Phone is required',
-                  ),
-                   const SizedBox(height: 20),
-
-                  // Role
-                  _buildLabel('Job Role'),
-                  TextFormField(
-                    controller: _roleController,
-                    decoration: _inputDecoration('e.g. Senior Stylist', Icons.work_outline),
-                    validator: (v) => v?.isNotEmpty == true ? null : 'Role is required',
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Row for Dropdowns
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Experience'),
-                            DropdownButtonFormField<String>(
-                              value: _experience,
-                              isExpanded: true, // Fix for overflow
-                              items: ['Experienced', 'Non-experienced']
-                                  .map((e) => DropdownMenuItem(
-                                        value: e,
-                                        child: Text(
-                                          e,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (v) => setState(() {
-                                _experience = v;
-                                _hasChanges = true;
-                              }),
-                              decoration: _inputDecoration('', Icons.star_border),
-                              validator: (v) => v != null ? null : 'Required',
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Status'),
-                            DropdownButtonFormField<String>(
-                              value: _status,
-                              isExpanded: true, // Fix for overflow
-                              items: ['Active', 'Inactive']
-                                  .map((e) => DropdownMenuItem(
-                                        value: e,
-                                        child: Text(
-                                          e,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (v) => setState(() {
-                                _status = v;
-                                _hasChanges = true;
-                              }),
-                              decoration: _inputDecoration('', Icons.toggle_on_outlined),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Join Date
-                  _buildLabel('Join Date'),
-                  TextFormField(
-                    controller: _joinDateController,
-                    readOnly: true,
-                    onTap: _selectDate,
-                    decoration: _inputDecoration('Select date', Icons.calendar_today_outlined),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Actions
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () async {
-                             // Treat explicit Cancel button as a "Go Back" action
-                             // This will trigger the PopScope
-                             Navigator.maybePop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(color: AppColors.grey),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: const Text('Cancel', style: TextStyle(color: AppColors.grey)),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _saveForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            _isEditMode ? 'Update Employee' : 'Create Employee',
-                            style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
       ),
     );
   }
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSizes.p8),
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 13,
+          fontSize: AppFontSizes.sm,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
         ),
@@ -480,22 +642,25 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
   InputDecoration _inputDecoration(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: AppColors.grey, size: 20),
+      prefixIcon: Icon(icon, color: AppColors.grey, size: AppSizes.iconSmall),
       filled: true,
-      fillColor: const Color(0xFFFAFAFA),
+      fillColor: AppColors.inputFill,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.small,
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+        borderRadius: AppRadius.small,
+        borderSide: const BorderSide(color: AppColors.inputBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.small,
         borderSide: const BorderSide(color: AppColors.primary),
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: AppSizes.p16,
+        horizontal: AppSizes.p16,
+      ),
     );
   }
 }

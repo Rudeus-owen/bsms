@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
-import 'package:bsms/src/views/employee_screen.dart';
-import 'package:bsms/src/views/overview_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final int selectedIndex;
@@ -185,11 +183,14 @@ class AppDrawer extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              onTap: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  SignInPage.routeName,
-                  (route) => false,
-                );
+              onTap: () async {
+                await ApiAuth.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    SignInPage.routeName,
+                    (route) => false,
+                  );
+                }
               },
             ),
           ),
