@@ -1,6 +1,6 @@
 import 'package:bsms/src/api/api_service.dart';
 import 'package:bsms/src/models/employee.dart';
-import 'package:dio/dio.dart';
+import 'package:bsms/src/helpers/api_error_handler.dart';
 import 'package:flutter/foundation.dart';
 
 class EmployeeService {
@@ -17,6 +17,7 @@ class EmployeeService {
         'limit': limit,
         if (role != null) 'role': role,
         if (branchId != null) 'branch_id': branchId,
+        if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final response = await ApiService.dio.get(
@@ -41,13 +42,8 @@ class EmployeeService {
           'message': response.data['message'] ?? 'Failed to fetch employees',
         };
       }
-    } on DioException catch (e) {
-      return {
-        'success': false,
-        'message': e.response?.data['message'] ?? e.message,
-      };
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 
@@ -65,7 +61,7 @@ class EmployeeService {
         return {'success': false, 'message': response.data['message']};
       }
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 
@@ -76,7 +72,7 @@ class EmployeeService {
     try {
       debugPrint('Create Employee Request Data: $data');
       final response = await ApiService.dio.post(
-        '/users/staffs/create', // Corrected URL
+        '/users/staffs/create',
         data: data,
       );
       debugPrint(
@@ -100,17 +96,8 @@ class EmployeeService {
             : 'Server error ${response.statusCode}';
         return {'success': false, 'message': msg ?? 'Failed to create'};
       }
-    } on DioException catch (e) {
-      String message = e.message ?? 'Unknown error';
-      if (e.response?.data is Map) {
-        message = e.response?.data['message'] ?? message;
-      } else if (e.response?.data is String) {
-        // Handle HTML or plain text error responses
-        message = 'Server Error: ${e.response?.statusCode}';
-      }
-      return {'success': false, 'message': message};
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 
@@ -143,13 +130,8 @@ class EmployeeService {
           'message': response.data['message'] ?? 'Failed to update',
         };
       }
-    } on DioException catch (e) {
-      return {
-        'success': false,
-        'message': e.response?.data['message'] ?? e.message,
-      };
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 
@@ -177,7 +159,7 @@ class EmployeeService {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 
@@ -207,13 +189,8 @@ class EmployeeService {
           'message': response.data['message'] ?? 'Failed to update password',
         };
       }
-    } on DioException catch (e) {
-      return {
-        'success': false,
-        'message': e.response?.data['message'] ?? e.message,
-      };
     } catch (e) {
-      return {'success': false, 'message': e.toString()};
+      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
     }
   }
 }

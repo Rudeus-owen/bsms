@@ -1,6 +1,4 @@
-import 'package:bsms/src/utils/build_context.dart';
 import 'package:bsms/src/views/language_screen.dart';
-import 'package:bsms/src/views/service_record_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 
@@ -28,14 +26,6 @@ class MainScaffold extends StatefulWidget {
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
-  late int _selectedIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedIndex = widget.selectedIndex;
-  }
-
   // Menu labels matching drawer items
   static const List<String> _screenTitles = [
     'Overview',
@@ -95,28 +85,16 @@ class _MainScaffoldState extends State<MainScaffold> {
             onPressed: () {
               context.toNextScreen(const LanguageScreen());
             },
-            icon: const Icon(Icons.language, color: Colors.blue,),
+            icon: const Icon(Icons.language, color: Colors.blue),
           ),
           const ConnectivityIndicator(),
           const SizedBox(width: 16),
         ],
       ),
       drawer: AppDrawer(
-        selectedIndex: _selectedIndex,
+        selectedIndex: widget.selectedIndex,
         onItemSelected: (index) {
-          setState(() => _selectedIndex = index);
-          // switch (index) {
-          // case 0:
-          //   Navigator.of(
-          //     context,
-          //   ).pushReplacementNamed(OverviewScreen.routeName);
-          //   break;
-          // case 1:
-          //   Navigator.of(
-          //     context,
-          //   ).pushReplacementNamed(ServiceRecordScreen.routeName);
-          //   break;
-          // }
+          // Navigation is handled by AppDrawer, no need to update local state
         },
       ),
       body: widget.body,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
+import 'package:bsms/src/mixins/connectivity_refresh_mixin.dart';
+import 'package:intl/intl.dart';
 
 class EmployeeScreen extends StatefulWidget {
   static const routeName = '/employees';
@@ -9,7 +11,8 @@ class EmployeeScreen extends StatefulWidget {
   State<EmployeeScreen> createState() => _EmployeeScreenState();
 }
 
-class _EmployeeScreenState extends State<EmployeeScreen> {
+class _EmployeeScreenState extends State<EmployeeScreen>
+    with ConnectivityRefreshMixin {
   DateTime? _selectedDate;
   String _selectedStatus = 'All Status';
   String _searchQuery = '';
@@ -17,6 +20,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   final int _itemsPerPage = 10;
 
   bool _isLoading = false;
+  bool _isFirstLoad = true;
   List<Employee> _employees = [];
   int _totalPages = 1;
   int _totalCount = 0;
@@ -27,6 +31,19 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   void initState() {
     super.initState();
     _loadBranchAndEmployees();
+  }
+
+  @override
+  void onConnectivityRegained() {
+    // Auto-refresh when back online
+    _fetchEmployees();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Back online - Refreshing data...'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _loadBranchAndEmployees() async {
@@ -49,6 +66,8 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
       page: _currentPage,
       limit: _itemsPerPage,
       branchId: _branchId,
+      search: _searchQuery,
+      role: null, // Add role filter if needed
     );
 
     print(
@@ -61,12 +80,19 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
           _employees = result['data'];
           _totalCount = result['total'];
           _totalPages = result['totalPages'];
+          _employees = result['data'];
+          _totalCount = result['total'];
+          _totalPages = result['totalPages'];
           _isLoading = false;
+          _isFirstLoad = false;
         });
       }
     } else {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isFirstLoad = false;
+        });
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(result['message'])));
@@ -98,9 +124,12 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
             'name': e.fullName,
             'phone': e.phone,
             'role': e.roleName,
+            'salary': '${NumberFormat('#,###').format(e.salary)} MMK',
+            'commission': '${e.commissionRate}%',
             'experience': e.salary > 200000 ? 'Experienced' : 'Non-experienced',
             'status': e.isActive ? 'Active' : 'Inactive',
             'joinDate': e.createdAt.toIso8601String().split('T')[0],
+            'original': e,
           },
         )
         .toList();
@@ -114,173 +143,204 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
     return MainScaffold(
       title: 'Employees',
       selectedIndex: 2,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Header: subtitle + add button ────────────────────
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Manage your salon team members',
-                          style: TextStyle(fontSize: 13, color: AppColors.grey),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: 34,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              EmployeeEditScreen.routeName,
-                            ).then((_) => _fetchEmployees());
-                          },
-                          icon: const Icon(Icons.add, size: 15),
-                          label: const Text('New Employee'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Summary Cards (3‑across, fits any width) ─────────
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: SummaryCard(
-                            icon: Icons.people,
-                            iconColor: Colors.blue.shade700,
-                            iconBgColor: Colors.blue.shade50,
-                            count: _totalCount,
-                            label: 'Total',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: SummaryCard(
-                            icon: Icons.person,
-                            iconColor: Colors.green.shade700,
-                            iconBgColor: Colors.green.shade50,
-                            count: _expCount,
-                            label: 'Experienced',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: SummaryCard(
-                            icon: Icons.person_outline,
-                            iconColor: Colors.orange.shade700,
-                            iconBgColor: Colors.orange.shade50,
-                            count: _nonExpCount,
-                            label: 'Non-Experience',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Filters ──────────────────────────────────────────
-                  DataFilterBar(
-                    selectedDate: _selectedDate,
-                    onDateChanged: (d) => setState(() {
-                      _selectedDate = d;
-                      _currentPage = 1;
-                    }),
-                    statusOptions: const ['All Status', 'Active', 'Inactive'],
-                    selectedStatus: _selectedStatus,
-                    onStatusChanged: (s) => setState(() {
-                      _selectedStatus = s;
-                      _currentPage = 1;
-                    }),
-                    searchHint: 'Search employee...',
-                    onSearchChanged: (q) => setState(() {
-                      _searchQuery = q;
-                      _currentPage = 1;
-                    }),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Data ─────────────────────────────────────────────
-                  // ── Data ─────────────────────────────────────────────
-                  DynamicDataTable(
-                    data: _paginatedEmployees,
-                    onRowTap: (row) {
-                      Navigator.pushNamed(
-                        context,
-                        EmployeeEditScreen.routeName,
-                        arguments: row['original'],
-                      ).then((_) => _fetchEmployees());
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Pagination Controls ──────────────────────────────
-                  if (_employees.isNotEmpty)
+      body: RefreshIndicator(
+        onRefresh: _fetchEmployees,
+        color: AppColors.primary,
+        child: _isFirstLoad
+            ? const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: TableShimmer(),
+              )
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Header: subtitle + add button ────────────────────
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(
-                          'Page $_currentPage of $_totalPages',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.grey,
+                        const Expanded(
+                          child: Text(
+                            'Manage your salon team members',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.grey,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          icon: const Icon(Icons.chevron_left),
-                          onPressed: _currentPage > 1
-                              ? () {
-                                  setState(() => _currentPage--);
-                                  _fetchEmployees();
-                                }
-                              : null,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          icon: const Icon(Icons.chevron_right),
-                          onPressed: _currentPage < _totalPages
-                              ? () {
-                                  setState(() => _currentPage++);
-                                  _fetchEmployees();
-                                }
-                              : null,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          height: 34,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                EmployeeEditScreen.routeName,
+                              ).then((_) => _fetchEmployees());
+                            },
+                            icon: const Icon(Icons.add, size: 15),
+                            label: const Text('New Employee'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  const SizedBox(height: 20),
-                ],
+
+                    const SizedBox(height: 12),
+
+                    // ── Summary Cards (3‑across, fits any width) ─────────
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: SummaryCard(
+                              icon: Icons.people,
+                              iconColor: Colors.blue.shade700,
+                              iconBgColor: Colors.blue.shade50,
+                              count: _totalCount,
+                              label: 'Total',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SummaryCard(
+                              icon: Icons.person,
+                              iconColor: Colors.green.shade700,
+                              iconBgColor: Colors.green.shade50,
+                              count: _expCount,
+                              label: 'Experienced',
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SummaryCard(
+                              icon: Icons.person_outline,
+                              iconColor: Colors.orange.shade700,
+                              iconBgColor: Colors.orange.shade50,
+                              count: _nonExpCount,
+                              label: 'Non-Experience',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ── Filters ──────────────────────────────────────────
+                    DataFilterBar(
+                      selectedDate: _selectedDate,
+                      onDateChanged: (d) => setState(() {
+                        _selectedDate = d;
+                        _currentPage = 1;
+                      }),
+                      statusOptions: const ['All Status', 'Active', 'Inactive'],
+                      selectedStatus: _selectedStatus,
+                      onStatusChanged: (s) => setState(() {
+                        _selectedStatus = s;
+                        _currentPage = 1;
+                      }),
+                      searchHint: 'Search employee...',
+                      onSearchChanged: (q) => setState(() {
+                        _searchQuery = q;
+                        _currentPage = 1;
+                      }),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    if (_isLoading)
+                      const LinearProgressIndicator(
+                        color: AppColors.primary,
+                        backgroundColor: AppColors.inputFill,
+                      ),
+                    const SizedBox(height: 8),
+
+                    DynamicDataTable(
+                      data: _paginatedEmployees,
+                      columnKeys: const [
+                        'name',
+                        'phone',
+                        'role',
+                        'salary',
+                        'commission',
+                        'experience',
+                        'status',
+                        'joinDate',
+                      ],
+                      onRowTap: (row) {
+                        Navigator.pushNamed(
+                          context,
+                          EmployeeEditScreen.routeName,
+                          arguments: row['original'],
+                        ).then((_) => _fetchEmployees());
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ── Pagination Controls ──────────────────────────────
+                    if (_employees.isNotEmpty)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Page $_currentPage of $_totalPages',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left),
+                            onPressed: _currentPage > 1
+                                ? () {
+                                    setState(() => _currentPage--);
+                                    _fetchEmployees();
+                                  }
+                                : null,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right),
+                            onPressed: _currentPage < _totalPages
+                                ? () {
+                                    setState(() => _currentPage++);
+                                    _fetchEmployees();
+                                  }
+                                : null,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

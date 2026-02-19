@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'dart:io';
+import 'package:bsms/src/helpers/api_error_handler.dart';
 import 'api_service.dart';
 
 class ApiAuth {
@@ -64,16 +64,10 @@ class ApiAuth {
 
       String message = 'Something went wrong. Please try again.';
 
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.sendTimeout ||
-          e.error is SocketException) {
-        message = 'Please check your internet connection.';
-      } else if (e.response?.statusCode == 400 ||
-          e.response?.statusCode == 401) {
+      if (e.response?.statusCode == 400 || e.response?.statusCode == 401) {
         message = 'Invalid email or password.';
-      } else if (e.response?.data['message'] != null) {
-        message = e.response?.data['message'];
+      } else {
+        message = ApiErrorHandler.getMessage(e);
       }
 
       return {'success': false, 'message': message};

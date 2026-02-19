@@ -1,6 +1,5 @@
 import 'package:bsms/src/localization/demolocalization.dart';
 import 'package:bsms/src/localization/language_constant.dart';
-import 'package:bsms/src/utils/common_costant.dart';
 import 'package:bsms/src/views/language_screen.dart';
 import 'package:bsms/src/views/service_list_screen.dart';
 import 'package:bsms/src/views/service_record_detail_screen.dart';
@@ -22,10 +21,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   @override
   void initState() {
-    
     WidgetsBinding.instance.addObserver(this);
     getLocale().then((locale) {
       if (locale.languageCode == 'my') {
@@ -44,7 +41,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _locale = locale;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,10 +52,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         scaffoldBackgroundColor: AppColors.scaffoldBg,
       ),
       locale: _locale,
-      supportedLocales: [
-        Locale('en', "US"),
-        Locale('my', "BU"),
-      ],
+      supportedLocales: [Locale('en', "US"), Locale('my', "BU")],
       localizationsDelegates: [
         DemoLocalization.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -67,8 +61,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ],
       localeResolutionCallback: (locale, supportedLocales) {
         for (var supportedLocale in supportedLocales) {
-          if (supportedLocale.languageCode ==
-                  locale!.languageCode &&
+          if (supportedLocale.languageCode == locale!.languageCode &&
               supportedLocale.countryCode == locale.countryCode) {
             return supportedLocale;
           }

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SecureStorage {
   factory SecureStorage() => _instance;
@@ -10,7 +9,6 @@ class SecureStorage {
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   Future<void> init() async {
-
     // final url = await storage.readString(USE_URL) ?? "";
     // final domain = await storage.readString(USE_DOMAIN) ?? "";
 

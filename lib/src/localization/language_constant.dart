@@ -1,5 +1,5 @@
-import 'package:bsms/src/utils/common_costant.dart';
-import 'package:bsms/src/utils/secure_storage.dart';
+import 'package:bsms/src/core/constants/app_constants.dart';
+import 'package:bsms/src/services/secure_storage.dart';
 import 'package:flutter/material.dart';
 
 //languages code

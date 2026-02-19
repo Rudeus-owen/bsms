@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
+import 'package:bsms/src/mixins/connectivity_refresh_mixin.dart';
 
 class CustomerScreen extends StatefulWidget {
   static const routeName = '/customers';
@@ -9,13 +10,34 @@ class CustomerScreen extends StatefulWidget {
   State<CustomerScreen> createState() => _CustomerScreenState();
 }
 
-class _CustomerScreenState extends State<CustomerScreen> {
+class _CustomerScreenState extends State<CustomerScreen>
+    with ConnectivityRefreshMixin {
   DateTime? _selectedDate;
   String _selectedStatus =
       'All Status'; // Placeholder for future status filter if needed
   String _searchQuery = '';
   int _currentPage = 1;
   final int _itemsPerPage = 10;
+  bool _isLoading = false;
+
+  @override
+  void onConnectivityRegained() {
+    _refreshData();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Back online - Refreshing data...'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _refreshData() async {
+    setState(() => _isLoading = true);
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) setState(() => _isLoading = false);
+  }
 
   List<Map<String, dynamic>> get _paginatedCustomers {
     final startIndex = (_currentPage - 1) * _itemsPerPage;
@@ -186,137 +208,151 @@ class _CustomerScreenState extends State<CustomerScreen> {
     return MainScaffold(
       title: 'Customers',
       selectedIndex: 5,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Manage your customer base',
-                    style: TextStyle(fontSize: 13, color: AppColors.grey),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.people,
-                      iconColor: Colors.blue.shade700,
-                      iconBgColor: Colors.blue.shade50,
-                      count: _totalCount,
-                      label: 'Total Customers',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.star,
-                      iconColor: Colors.amber.shade700,
-                      iconBgColor: Colors.amber.shade50,
-                      count: _highSpendersCount,
-                      label: 'VIP Members',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SummaryCard(
-                      icon: Icons.person_add,
-                      iconColor: Colors.green.shade700,
-                      iconBgColor: Colors.green.shade50,
-                      count: _newMembersCount,
-                      label: 'New (This Year)',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            DataFilterBar(
-              selectedDate: _selectedDate,
-              onDateChanged: (d) => setState(() {
-                _selectedDate = d;
-                _currentPage = 1;
-              }),
-              statusOptions: const ['All Status'],
-              selectedStatus: _selectedStatus,
-              onStatusChanged: (s) => setState(() {
-                _selectedStatus = s;
-                _currentPage = 1;
-              }),
-              searchHint: 'Search name, phone, email...',
-              onSearchChanged: (q) => setState(() {
-                _searchQuery = q;
-                _currentPage = 1;
-              }),
-            ),
-            const SizedBox(height: 12),
-
-            DynamicDataTable(
-              data: _paginatedCustomers,
-              columnKeys: const [
-                'name',
-                'ph',
-                'email',
-                'loyalty_points',
-                'total_spent',
-                'created_at',
-              ],
-              columnLabels: const {
-                'name': 'Name',
-                'ph': 'Phone',
-                'email': 'Email',
-                'loyalty_points': 'Points',
-                'total_spent': 'Total Spent',
-                'created_at': 'Joined',
-              },
-              onRowTap: (row) {
-              },
-            ),
-
-            const SizedBox(height: 12),
-
-            if (_filteredCustomers.isNotEmpty)
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'Page $_currentPage of ${(_filteredCustomers.length / _itemsPerPage).ceil()}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: _currentPage > 1
-                        ? () => setState(() => _currentPage--)
-                        : null,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right),
-                    onPressed:
-                        _currentPage <
-                            (_filteredCustomers.length / _itemsPerPage).ceil()
-                        ? () => setState(() => _currentPage++)
-                        : null,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  const Expanded(
+                    child: Text(
+                      'Manage your customer base',
+                      style: TextStyle(fontSize: 13, color: AppColors.grey),
+                    ),
                   ),
                 ],
               ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 12),
+
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.people,
+                        iconColor: Colors.blue.shade700,
+                        iconBgColor: Colors.blue.shade50,
+                        count: _totalCount,
+                        label: 'Total Customers',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.star,
+                        iconColor: Colors.amber.shade700,
+                        iconBgColor: Colors.amber.shade50,
+                        count: _highSpendersCount,
+                        label: 'VIP Members',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SummaryCard(
+                        icon: Icons.person_add,
+                        iconColor: Colors.green.shade700,
+                        iconBgColor: Colors.green.shade50,
+                        count: _newMembersCount,
+                        label: 'New (This Year)',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              DataFilterBar(
+                selectedDate: _selectedDate,
+                onDateChanged: (d) => setState(() {
+                  _selectedDate = d;
+                  _currentPage = 1;
+                }),
+                statusOptions: const ['All Status'],
+                selectedStatus: _selectedStatus,
+                onStatusChanged: (s) => setState(() {
+                  _selectedStatus = s;
+                  _currentPage = 1;
+                }),
+                searchHint: 'Search name, phone, email...',
+                onSearchChanged: (q) => setState(() {
+                  _searchQuery = q;
+                  _currentPage = 1;
+                }),
+              ),
+              const SizedBox(height: 12),
+
+              if (_isLoading)
+                const LinearProgressIndicator(
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.inputFill,
+                ),
+              const SizedBox(height: 8),
+
+              DynamicDataTable(
+                data: _paginatedCustomers,
+                columnKeys: const [
+                  'name',
+                  'ph',
+                  'email',
+                  'loyalty_points',
+                  'total_spent',
+                  'created_at',
+                ],
+                columnLabels: const {
+                  'name': 'Name',
+                  'ph': 'Phone',
+                  'email': 'Email',
+                  'loyalty_points': 'Points',
+                  'total_spent': 'Total Spent',
+                  'created_at': 'Joined',
+                },
+                onRowTap: (row) {},
+              ),
+
+              const SizedBox(height: 12),
+
+              if (_filteredCustomers.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Page $_currentPage of ${(_filteredCustomers.length / _itemsPerPage).ceil()}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.grey,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: _currentPage > 1
+                          ? () => setState(() => _currentPage--)
+                          : null,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      onPressed:
+                          _currentPage <
+                              (_filteredCustomers.length / _itemsPerPage).ceil()
+                          ? () => setState(() => _currentPage++)
+                          : null,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

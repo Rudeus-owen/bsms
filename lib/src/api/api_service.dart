@@ -11,8 +11,9 @@ class ApiService {
 
   static void init() {
     _dio.options.baseUrl = ApiConfig.baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
+    _dio.options.connectTimeout = const Duration(seconds: 60);
+    _dio.options.receiveTimeout = const Duration(seconds: 60);
+    _dio.options.sendTimeout = const Duration(seconds: 60);
 
     _dio.interceptors.add(
       InterceptorsWrapper(

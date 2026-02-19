@@ -313,296 +313,269 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       child: MainScaffold(
         showBackButton: true,
         title: _isEditMode ? 'Edit Employee' : 'New Employee',
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSizes.p16),
-                child: Center(
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    padding: const EdgeInsets.all(AppSizes.p20),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: AppRadius.large,
-                      border: Border.all(color: AppColors.border),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.p16),
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              padding: const EdgeInsets.all(AppSizes.p20),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: AppRadius.large,
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _isEditMode ? 'Update Details' : 'Employee Details',
+                      style: const TextStyle(
+                        fontSize: AppFontSizes.xl,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.black,
+                      ),
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    const SizedBox(height: AppSizes.p24),
+
+                    // Name
+                    _buildLabel('Full Name'),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: _inputDecoration(
+                        'Enter full name',
+                        Icons.person_outline,
+                      ),
+                      validator: (v) =>
+                          v?.isNotEmpty == true ? null : 'Name is required',
+                    ),
+                    const SizedBox(height: AppSizes.p20),
+
+                    // Email
+                    _buildLabel('Email'),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _inputDecoration(
+                        'Enter email',
+                        Icons.email_outlined,
+                      ),
+                      validator: (v) =>
+                          v?.isNotEmpty == true ? null : 'Email is required',
+                    ),
+                    const SizedBox(height: AppSizes.p20),
+
+                    // Phone
+                    _buildLabel('Phone Number'),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: _inputDecoration(
+                        '09-XXX-XXXX',
+                        Icons.phone_outlined,
+                      ),
+                      validator: (v) =>
+                          v?.isNotEmpty == true ? null : 'Phone is required',
+                    ),
+                    const SizedBox(height: AppSizes.p20),
+
+                    // Password (Create Mode Only)
+                    if (!_isEditMode) ...[
+                      _buildLabel('Password'),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: _inputDecoration(
+                          'Enter password',
+                          Icons.lock_outline,
+                        ),
+                        validator: (v) => v?.isNotEmpty == true
+                            ? null
+                            : 'Password is required',
+                      ),
+                      const SizedBox(height: AppSizes.p20),
+                    ],
+
+                    // Job Role (Dropdown for API role int)
+                    _buildLabel('Job Role'),
+                    DropdownButtonFormField<int>(
+                      value: _role,
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem(value: 1, child: Text('Admin')),
+                        DropdownMenuItem(value: 2, child: Text('Employee')),
+                        DropdownMenuItem(value: 3, child: Text('Receptionist')),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _role = v ?? 2;
+                        _hasChanges = true;
+                      }),
+                      decoration: _inputDecoration('', Icons.work_outline),
+                    ),
+                    const SizedBox(height: AppSizes.p20),
+
+                    // Salary & Commission
+                    _buildResponsivePair(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _isEditMode ? 'Update Details' : 'Employee Details',
-                            style: const TextStyle(
-                              fontSize: AppFontSizes.xl,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          const SizedBox(height: AppSizes.p24),
-
-                          // Name
-                          _buildLabel('Full Name'),
+                          _buildLabel('Salary'),
                           TextFormField(
-                            controller: _nameController,
+                            controller: _salaryController,
+                            keyboardType: TextInputType.number,
                             decoration: _inputDecoration(
-                              'Enter full name',
-                              Icons.person_outline,
-                            ),
-                            validator: (v) => v?.isNotEmpty == true
-                                ? null
-                                : 'Name is required',
+                              '0',
+                              Icons.money,
+                            ).copyWith(suffixText: 'MMK'),
+                            validator: (v) =>
+                                v?.isNotEmpty == true ? null : 'Required',
                           ),
-                          const SizedBox(height: AppSizes.p20),
-
-                          // Email
-                          _buildLabel('Email'),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Commission (%)'),
                           TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: _inputDecoration(
-                              'Enter email',
-                              Icons.email_outlined,
-                            ),
-                            validator: (v) => v?.isNotEmpty == true
-                                ? null
-                                : 'Email is required',
+                            controller: _commissionController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration('0.0', Icons.percent),
+                            validator: (v) =>
+                                v?.isNotEmpty == true ? null : 'Required',
                           ),
-                          const SizedBox(height: AppSizes.p20),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.p20),
 
-                          // Phone
-                          _buildLabel('Phone Number'),
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            decoration: _inputDecoration(
-                              '09-XXX-XXXX',
-                              Icons.phone_outlined,
-                            ),
-                            validator: (v) => v?.isNotEmpty == true
-                                ? null
-                                : 'Phone is required',
-                          ),
-                          const SizedBox(height: AppSizes.p20),
-
-                          // Password (Create Mode Only)
-                          if (!_isEditMode) ...[
-                            _buildLabel('Password'),
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              decoration: _inputDecoration(
-                                'Enter password',
-                                Icons.lock_outline,
-                              ),
-                              validator: (v) => v?.isNotEmpty == true
-                                  ? null
-                                  : 'Password is required',
-                            ),
-                            const SizedBox(height: AppSizes.p20),
-                          ],
-
-                          // Job Role (Dropdown for API role int)
-                          _buildLabel('Job Role'),
-                          DropdownButtonFormField<int>(
-                            value: _role,
+                    // Experience & Status
+                    _buildResponsivePair(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Experience'),
+                          DropdownButtonFormField<String>(
+                            value: _experience,
                             isExpanded: true,
-                            items: [
-                              DropdownMenuItem(value: 1, child: Text('Admin')),
-                              DropdownMenuItem(
-                                value: 2,
-                                child: Text('Employee'),
-                              ),
-                              DropdownMenuItem(
-                                value: 3,
-                                child: Text('Receptionist'),
-                              ),
-                            ],
+                            items: ['Experienced', 'Non-experienced']
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      e,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                             onChanged: (v) => setState(() {
-                              _role = v ?? 2;
+                              _experience = v;
+                              _hasChanges = true;
+                            }),
+                            decoration: _inputDecoration('', Icons.star_border),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Status'),
+                          DropdownButtonFormField<String>(
+                            value: _status,
+                            isExpanded: true,
+                            items: ['Active', 'Inactive']
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() {
+                              _status = v;
                               _hasChanges = true;
                             }),
                             decoration: _inputDecoration(
                               '',
-                              Icons.work_outline,
+                              Icons.toggle_on_outlined,
                             ),
                           ),
-                          const SizedBox(height: AppSizes.p20),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.p20),
 
-                          // Salary & Commission
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildLabel('Salary'),
-                                    TextFormField(
-                                      controller: _salaryController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: _inputDecoration(
-                                        '0.0',
-                                        Icons.attach_money,
-                                      ),
-                                      validator: (v) => v?.isNotEmpty == true
-                                          ? null
-                                          : 'Required',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: AppSizes.p16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildLabel('Commission (%)'),
-                                    TextFormField(
-                                      controller: _commissionController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: _inputDecoration(
-                                        '0.0',
-                                        Icons.percent,
-                                      ),
-                                      validator: (v) => v?.isNotEmpty == true
-                                          ? null
-                                          : 'Required',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSizes.p20),
+                    // Join Date (Read-only for now as API uses created_at)
+                    _buildLabel('Join Date'),
+                    TextFormField(
+                      controller: _joinDateController,
+                      readOnly: true,
+                      decoration: _inputDecoration(
+                        'Select date',
+                        Icons.calendar_today_outlined,
+                      ),
+                      // onTap: _selectDate, // Disable editing join date if mapped to created_at
+                    ),
 
-                          // Experience & Status (Visual / mapped to is_active)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildLabel('Experience'),
-                                    DropdownButtonFormField<String>(
-                                      value: _experience,
-                                      isExpanded: true,
-                                      items: ['Experienced', 'Non-experienced']
-                                          .map(
-                                            (e) => DropdownMenuItem(
-                                              value: e,
-                                              child: Text(
-                                                e,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                      onChanged: (v) => setState(() {
-                                        _experience = v;
-                                        _hasChanges = true;
-                                      }),
-                                      decoration: _inputDecoration(
-                                        '',
-                                        Icons.star_border,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: AppSizes.p16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildLabel('Status'),
-                                    DropdownButtonFormField<String>(
-                                      value: _status,
-                                      isExpanded: true,
-                                      items: ['Active', 'Inactive']
-                                          .map(
-                                            (e) => DropdownMenuItem(
-                                              value: e,
-                                              child: Text(e),
-                                            ),
-                                          )
-                                          .toList(),
-                                      onChanged: (v) => setState(() {
-                                        _status = v;
-                                        _hasChanges = true;
-                                      }),
-                                      decoration: _inputDecoration(
-                                        '',
-                                        Icons.toggle_on_outlined,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSizes.p20),
+                    const SizedBox(height: AppSizes.p32),
 
-                          // Join Date (Read-only for now as API uses created_at)
-                          _buildLabel('Join Date'),
-                          TextFormField(
-                            controller: _joinDateController,
-                            readOnly: true,
-                            decoration: _inputDecoration(
-                              'Select date',
-                              Icons.calendar_today_outlined,
-                            ),
-                            // onTap: _selectDate, // Disable editing join date if mapped to created_at
-                          ),
-
-                          const SizedBox(height: AppSizes.p32),
-
-                          // Actions
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () async {
+                    // Actions
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
                                     Navigator.maybePop(context);
                                   },
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: AppSizes.p16,
-                                    ),
-                                    side: const BorderSide(
-                                      color: AppColors.grey,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: AppRadius.small,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Cancel',
-                                    style: TextStyle(color: AppColors.grey),
-                                  ),
-                                ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSizes.p16,
                               ),
-                              const SizedBox(width: AppSizes.p16),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: _saveForm,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: AppSizes.p16,
+                              side: const BorderSide(color: AppColors.grey),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppRadius.small,
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: AppColors.grey),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.p16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _saveForm,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSizes.p16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppRadius.small,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.white,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: AppRadius.small,
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(
+                                  )
+                                : Text(
                                     _isEditMode
                                         ? 'Update Employee'
                                         : 'Create Employee',
@@ -611,17 +584,41 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
-                              ),
-                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
               ),
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildResponsivePair(Widget first, Widget second) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 500) {
+          return Column(
+            children: [
+              first,
+              const SizedBox(height: AppSizes.p16),
+              second,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: first),
+            const SizedBox(width: AppSizes.p16),
+            Expanded(child: second),
+          ],
+        );
+      },
     );
   }
 

@@ -135,31 +135,46 @@ class AppDrawer extends StatelessWidget {
                       onItemSelected(index);
                       nav.pop(); // close drawer
                       // Navigate based on index
+                      String? routeName;
                       switch (index) {
                         case 0:
-                          nav.pushNamed(OverviewScreen.routeName);
+                          routeName = OverviewScreen.routeName;
                           break;
                         case 1:
-                          nav.pushNamed(ServiceRecordScreen.routeName);
+                          routeName = ServiceRecordScreen.routeName;
                           break;
                         case 2:
-                          nav.pushNamed(EmployeeScreen.routeName);
+                          routeName = EmployeeScreen.routeName;
                           break;
                         case 5:
-                          nav.pushNamed(CustomerScreen.routeName);
+                          routeName = CustomerScreen.routeName;
                           break;
                         case 7:
-                          nav.pushNamed(ServiceListScreen.routeName);
+                          routeName = ServiceListScreen.routeName;
                           break;
-                        default:
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${_items[index].label} coming soon!',
-                              ),
-                              duration: const Duration(seconds: 1),
-                            ),
+                      }
+
+                      if (routeName != null) {
+                        if (index == 0) {
+                          nav.pushNamedAndRemoveUntil(
+                            routeName,
+                            (route) => false,
                           );
+                        } else {
+                          nav.pushNamedAndRemoveUntil(
+                            routeName,
+                            ModalRoute.withName(OverviewScreen.routeName),
+                          );
+                        }
+                      } else {
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${_items[index].label} coming soon!',
+                            ),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
                       }
                     },
                   ),
