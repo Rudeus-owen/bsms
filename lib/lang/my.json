@@ -2,5 +2,15 @@
     "signin": "Login",
     "language": "ဘာသာစကား",
     "english": "အင်္ဂလိပ်",
-    "myanmar": "မြန်မာ"
+    "myanmar": "မြန်မာ",
+    "overview": "အကျဉ်းချုပ်",
+    "services_record": "ဝန်ဆောင်မှုမှတ်တမ်း",
+    "employees": "ဝန်ထမ်းများ",
+    "beauty_products": "အလှကုန်ပစ္စည်းများ",
+    "suppliers": "ပေးသွင်းသူများ",
+    "customer_management": "ဖောက်သည်စီမံခန့်ခွဲမှု",
+    "clients": "ဖောက်သည်များ",
+    "services": "ဝန်ဆောင်မှုများ",
+    "expense_income": "အသုံးစရိတ် / ဝင်ငွေ",
+    "coming_soon": " မကြာမီ ရရှိနိုင်မည်!"
 }

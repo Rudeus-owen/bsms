@@ -2,78 +2,69 @@ import 'package:flutter/material.dart';
 import 'package:bsms/exports.dart';
 import 'package:intl/intl.dart';
 
-class EmployeeEditScreen extends StatefulWidget {
-  static const routeName = '/employee-edit';
+class CustomerEditScreen extends StatefulWidget {
+  static const routeName = '/customer-edit';
 
-  const EmployeeEditScreen({super.key});
+  const CustomerEditScreen({super.key});
 
   @override
-  State<EmployeeEditScreen> createState() => _EmployeeEditScreenState();
+  State<CustomerEditScreen> createState() => _CustomerEditScreenState();
 }
 
-class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
+class _CustomerEditScreenState extends State<CustomerEditScreen> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _salaryController = TextEditingController();
-  final _commissionController = TextEditingController();
-  final _joinDateController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _dobController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _notesController = TextEditingController();
+  final _loyaltyPointsController = TextEditingController();
+  final _totalSpentController = TextEditingController();
 
   // State variables
-  String? _experience;
-  String? _status;
-  int _role = 2; // Default to Employee (2)
   bool _isInit = true;
   bool _isEditMode = false;
-  String? _employeeId;
+  String? _customerId;
   bool _isLoading = false;
 
   bool _hasChanges = false;
-
-  // Hardcoded branch ID
-  String? _branchId;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      _loadBranchId();
       final args = ModalRoute.of(context)?.settings.arguments;
-      // Args can be Employee object now
-      if (args is Employee) {
+      if (args is Customer) {
         _isEditMode = true;
-        _employeeId = args.id;
+        _customerId = args.id;
         _nameController.text = args.fullName;
         _phoneController.text = args.phone;
-        _emailController.text = args.email;
-        _role = args.role;
-        _salaryController.text = args.salary.toString();
-        _commissionController.text = args.commissionRate.toString();
-        _joinDateController.text = DateFormat(
-          'yyyy-MM-dd',
-        ).format(args.createdAt);
+        _emailController.text = args.email ?? '';
+        _addressController.text = args.address ?? '';
+        _notesController.text = args.notes ?? '';
+        _loyaltyPointsController.text = args.loyaltyPoints.toString();
+        _totalSpentController.text = args.totalSpent.toString();
 
-        // Map API data to UI-only fields if possible, or sets defaults
-        _experience = args.salary > 200000 ? 'Experienced' : 'Non-experienced';
-        _status = args.isActive ? 'Active' : 'Inactive';
+        if (args.dateOfBirth != null) {
+          _dobController.text = DateFormat(
+            'yyyy-MM-dd',
+          ).format(args.dateOfBirth!);
+        }
       } else if (args is Map<String, dynamic>) {
-        // Fallback for Map arguments if any
         _isEditMode = true;
-        _employeeId = args['id'];
+        _customerId = args['id'];
         _nameController.text = args['name'] ?? '';
-        _phoneController.text = args['phone'] ?? '';
-        // ... other fields
+        _phoneController.text = args['ph'] ?? '';
+        _emailController.text = args['email'] ?? '';
+        _loyaltyPointsController.text = (args['loyalty_points'] ?? 0)
+            .toString();
+        _totalSpentController.text = (args['total_spent'] ?? 0).toString();
       } else {
-        // Defaults for create mode
-        _status = 'Active';
-        _experience = 'Non-experienced';
-        _joinDateController.text = DateFormat(
-          'yyyy-MM-dd',
-        ).format(DateTime.now());
+        _loyaltyPointsController.text = '0';
+        _totalSpentController.text = '0';
       }
       _isInit = false;
 
@@ -85,18 +76,12 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       _nameController.addListener(onChange);
       _phoneController.addListener(onChange);
       _emailController.addListener(onChange);
-      _salaryController.addListener(onChange);
-      _commissionController.addListener(onChange);
-      _joinDateController.addListener(onChange);
-      _passwordController.addListener(onChange);
+      _dobController.addListener(onChange);
+      _addressController.addListener(onChange);
+      _notesController.addListener(onChange);
+      _loyaltyPointsController.addListener(onChange);
+      _totalSpentController.addListener(onChange);
     }
-  }
-
-  Future<void> _loadBranchId() async {
-    final branchId = await ApiService.getBranchId();
-    setState(() {
-      _branchId = branchId;
-    });
   }
 
   @override
@@ -104,10 +89,11 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _salaryController.dispose();
-    _commissionController.dispose();
-    _joinDateController.dispose();
-    _passwordController.dispose();
+    _dobController.dispose();
+    _addressController.dispose();
+    _notesController.dispose();
+    _loyaltyPointsController.dispose();
+    _totalSpentController.dispose();
     super.dispose();
   }
 
@@ -115,7 +101,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime(1900),
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
@@ -132,7 +118,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     );
     if (picked != null) {
       setState(() {
-        _joinDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
         _hasChanges = true;
       });
     }
@@ -252,27 +238,27 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
     setState(() => _isLoading = true);
 
     final Map<String, dynamic> data = {
-      if (_branchId != null) 'branch_id': _branchId,
       'full_name': _nameController.text,
-      'email': _emailController.text,
       'phone': _phoneController.text,
-      if (!_isEditMode) 'password': _passwordController.text,
-      'role': _role, // 1: admin, 2: employee, 3: receptionist
-      'salary': (double.tryParse(_salaryController.text) ?? 0).toInt(),
-      'commission_rate': double.tryParse(_commissionController.text) ?? 0.0,
-      'is_active': _status == 'Active',
-      'photo_url': null,
+      'email': _emailController.text.isNotEmpty ? _emailController.text : null,
+      'dob': _dobController.text.isNotEmpty ? _dobController.text : null,
+      'address': _addressController.text.isNotEmpty
+          ? _addressController.text
+          : null,
+      'notes': _notesController.text.isNotEmpty ? _notesController.text : null,
+      'loyalty_points': int.tryParse(_loyaltyPointsController.text) ?? 0,
+      'total_spent': double.tryParse(_totalSpentController.text) ?? 0,
     };
 
     if (_isEditMode) {
-      data['id'] = _employeeId;
+      data['id'] = _customerId;
     }
 
     Map<String, dynamic> result;
     if (_isEditMode) {
-      result = await EmployeeService.updateEmployee(data);
+      result = await CustomerService.updateCustomer(data);
     } else {
-      result = await EmployeeService.createEmployee(data);
+      result = await CustomerService.createCustomer(data);
     }
 
     setState(() => _isLoading = false);
@@ -283,7 +269,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              _isEditMode ? 'Employee updated!' : 'Employee created!',
+              _isEditMode ? 'Customer updated!' : 'Customer created!',
             ),
             backgroundColor: AppColors.success,
           ),
@@ -292,88 +278,6 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Operation failed'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _confirmDelete() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Delete Employee',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.black,
-            ),
-          ),
-          content: const Text(
-            'Are you sure you want to delete this employee? This action cannot be undone.',
-            style: TextStyle(color: AppColors.grey),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: AppColors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                'Delete',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirm == true) {
-      _deleteEmployee();
-    }
-  }
-
-  Future<void> _deleteEmployee() async {
-    if (_employeeId == null) return;
-
-    setState(() => _isLoading = true);
-
-    final result = await EmployeeService.deleteEmployee(_employeeId!);
-
-    setState(() => _isLoading = false);
-
-    if (mounted) {
-      if (result['success'] == true) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Employee deleted successfully!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Failed to delete employee'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -394,7 +298,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
       },
       child: MainScaffold(
         showBackButton: true,
-        title: _isEditMode ? 'Edit Employee' : 'New Employee',
+        title: _isEditMode ? 'Edit Customer' : 'New Customer',
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.p16),
           child: Center(
@@ -418,29 +322,13 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _isEditMode ? 'Update Details' : 'Employee Details',
-                          style: const TextStyle(
-                            fontSize: AppFontSizes.xl,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        if (_isEditMode)
-                          IconButton(
-                            icon: const Icon(
-                              Icons.more_vert,
-                              color: AppColors.primary,
-                            ),
-                            onPressed: _showOptionsBottomSheet,
-                            tooltip: 'Employee Options',
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                      ],
+                    Text(
+                      _isEditMode ? 'Update Details' : 'Customer Details',
+                      style: const TextStyle(
+                        fontSize: AppFontSizes.xl,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.black,
+                      ),
                     ),
                     const SizedBox(height: AppSizes.p24),
 
@@ -454,20 +342,6 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                       ),
                       validator: (v) =>
                           v?.isNotEmpty == true ? null : 'Name is required',
-                    ),
-                    const SizedBox(height: AppSizes.p20),
-
-                    // Email
-                    _buildLabel('Email'),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: _inputDecoration(
-                        'Enter email',
-                        Icons.email_outlined,
-                      ),
-                      validator: (v) =>
-                          v?.isNotEmpty == true ? null : 'Email is required',
                     ),
                     const SizedBox(height: AppSizes.p20),
 
@@ -485,125 +359,44 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                     ),
                     const SizedBox(height: AppSizes.p20),
 
-                    // Password (Create Mode Only)
-                    if (!_isEditMode) ...[
-                      _buildLabel('Password'),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: _inputDecoration(
-                          'Enter password',
-                          Icons.lock_outline,
-                        ),
-                        validator: (v) => v?.isNotEmpty == true
-                            ? null
-                            : 'Password is required',
-                      ),
-                      const SizedBox(height: AppSizes.p20),
-                    ],
-
-                    // Job Role (Dropdown for API role int)
-                    _buildLabel('Job Role'),
-                    DropdownButtonFormField<int>(
-                      value: _role,
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(value: 1, child: Text('Admin')),
-                        DropdownMenuItem(value: 2, child: Text('Employee')),
-                        DropdownMenuItem(value: 3, child: Text('Receptionist')),
-                      ],
-                      onChanged: (v) => setState(() {
-                        _role = v ?? 2;
-                        _hasChanges = true;
-                      }),
-                      decoration: _inputDecoration('', Icons.work_outline),
-                    ),
-                    const SizedBox(height: AppSizes.p20),
-
-                    // Salary & Commission
-                    _buildResponsivePair(
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Salary'),
-                          TextFormField(
-                            controller: _salaryController,
-                            keyboardType: TextInputType.number,
-                            decoration: _inputDecoration(
-                              '0',
-                              Icons.money,
-                            ).copyWith(suffixText: 'MMK'),
-                            validator: (v) =>
-                                v?.isNotEmpty == true ? null : 'Required',
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Commission (%)'),
-                          TextFormField(
-                            controller: _commissionController,
-                            keyboardType: TextInputType.number,
-                            decoration: _inputDecoration('0.0', Icons.percent),
-                            validator: (v) =>
-                                v?.isNotEmpty == true ? null : 'Required',
-                          ),
-                        ],
+                    // Email
+                    _buildLabel('Email (Optional)'),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _inputDecoration(
+                        'Enter email',
+                        Icons.email_outlined,
                       ),
                     ),
                     const SizedBox(height: AppSizes.p20),
 
-                    // Experience & Status
+                    // DOB & Address
                     _buildResponsivePair(
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Experience'),
-                          DropdownButtonFormField<String>(
-                            value: _experience,
-                            isExpanded: true,
-                            items: ['Experienced', 'Non-experienced']
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(
-                                      e,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() {
-                              _experience = v;
-                              _hasChanges = true;
-                            }),
-                            decoration: _inputDecoration('', Icons.star_border),
+                          _buildLabel('Date of Birth (Optional)'),
+                          TextFormField(
+                            controller: _dobController,
+                            readOnly: true,
+                            decoration: _inputDecoration(
+                              'Select date',
+                              Icons.calendar_today_outlined,
+                            ),
+                            onTap: _selectDate,
                           ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('Status'),
-                          DropdownButtonFormField<String>(
-                            value: _status,
-                            isExpanded: true,
-                            items: ['Active', 'Inactive']
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => setState(() {
-                              _status = v;
-                              _hasChanges = true;
-                            }),
+                          _buildLabel('Address (Optional)'),
+                          TextFormField(
+                            controller: _addressController,
                             decoration: _inputDecoration(
-                              '',
-                              Icons.toggle_on_outlined,
+                              'Enter address',
+                              Icons.home_outlined,
                             ),
                           ),
                         ],
@@ -611,16 +404,48 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                     ),
                     const SizedBox(height: AppSizes.p20),
 
-                    // Join Date (Read-only for now as API uses created_at)
-                    _buildLabel('Join Date'),
-                    TextFormField(
-                      controller: _joinDateController,
-                      readOnly: true,
-                      decoration: _inputDecoration(
-                        'Select date',
-                        Icons.calendar_today_outlined,
+                    // Loyalty Points & Total Spent
+                    _buildResponsivePair(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Loyalty Points'),
+                          TextFormField(
+                            controller: _loyaltyPointsController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(
+                              '0',
+                              Icons.star_border,
+                            ),
+                          ),
+                        ],
                       ),
-                      // onTap: _selectDate, // Disable editing join date if mapped to created_at
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Total Spent'),
+                          TextFormField(
+                            controller: _totalSpentController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(
+                              '0.0',
+                              Icons.money,
+                            ).copyWith(suffixText: 'MMK'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.p20),
+
+                    // Notes
+                    _buildLabel('Notes (Optional)'),
+                    TextFormField(
+                      controller: _notesController,
+                      maxLines: 3,
+                      decoration: _inputDecoration(
+                        'Enter any notes (e.g. allergies)',
+                        Icons.note_alt_outlined,
+                      ),
                     ),
 
                     const SizedBox(height: AppSizes.p32),
@@ -675,8 +500,8 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                                   )
                                 : Text(
                                     _isEditMode
-                                        ? 'Update Employee'
-                                        : 'Create Employee',
+                                        ? 'Update Customer'
+                                        : 'Create Customer',
                                     style: const TextStyle(
                                       color: AppColors.white,
                                       fontWeight: FontWeight.bold,
@@ -691,67 +516,6 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showOptionsBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.only(bottom: 20, top: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Employee Options',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.delete_outline, color: AppColors.error),
-              ),
-              title: const Text(
-                'Delete Employee',
-                style: TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              subtitle: const Text(
-                'Permanently remove from system',
-                style: TextStyle(color: AppColors.grey, fontSize: 12),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDelete();
-              },
-            ),
-          ],
         ),
       ),
     );

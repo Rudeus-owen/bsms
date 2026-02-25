@@ -20,51 +20,69 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      width: 200, // Fixed width for horizontal scrolling
+      padding: const EdgeInsets.all(AppSizes.p20),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEEEEEE)),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon + Count row
+          // Top Row: Label and Icon
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Expanded(
+                child: Text(
+                  label.replaceAll(
+                    '\n',
+                    ' ',
+                  ), // Remove newlines for horizontal layout
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: 14,
+                    color: AppColors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               Container(
-                width: 32,
-                height: 32,
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: iconColor, size: 16),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '$count',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.black,
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 6),
-          // Label — wraps naturally
+          const SizedBox(height: AppSizes.p16),
+          // Middle: Count
           Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.grey,
-              fontWeight: FontWeight.w500,
+            count.toString(),
+            style: AppTextStyles.heading.copyWith(
+              fontSize: 28,
+              color: AppColors.black,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          // Bottom: Subtext (optional placeholder)
+          Text(
+            'Updated just now',
+            style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
           ),
         ],
       ),

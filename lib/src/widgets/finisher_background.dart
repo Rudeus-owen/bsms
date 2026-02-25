@@ -68,10 +68,13 @@ class _FinisherBackgroundState extends State<FinisherBackground>
       }
 
       final particleSize =
-          _random.nextDouble() * (widget.maxSize - widget.minSize) + widget.minSize;
-      final vx = (_random.nextDouble() * widget.speedFactor + 0.1) *
+          _random.nextDouble() * (widget.maxSize - widget.minSize) +
+          widget.minSize;
+      final vx =
+          (_random.nextDouble() * widget.speedFactor + 0.1) *
           (_random.nextBool() ? 1 : -1);
-      final vy = (_random.nextDouble() * widget.speedFactor + 0.1) *
+      final vy =
+          (_random.nextDouble() * widget.speedFactor + 0.1) *
           (_random.nextBool() ? 1 : -1);
 
       return _Particle(
@@ -157,10 +160,7 @@ class _FinisherPainter extends CustomPainter {
   final List<_Particle> particles;
   final Color backgroundColor;
 
-  _FinisherPainter({
-    required this.particles,
-    required this.backgroundColor,
-  });
+  _FinisherPainter({required this.particles, required this.backgroundColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -171,10 +171,7 @@ class _FinisherPainter extends CustomPainter {
     );
 
     // Use saveLayer so overlay blending works against the background
-    canvas.saveLayer(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint(),
-    );
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
 
     // Re-draw background inside the layer
     canvas.drawRect(
@@ -188,10 +185,7 @@ class _FinisherPainter extends CustomPainter {
       final rect = Rect.fromCircle(center: Offset(p.x, p.y), radius: radius);
 
       final gradient = RadialGradient(
-        colors: [
-          p.color.withAlpha(255),
-          p.color.withAlpha(25),
-        ],
+        colors: [p.color.withAlpha(255), p.color.withAlpha(25)],
       );
 
       final paint = Paint()

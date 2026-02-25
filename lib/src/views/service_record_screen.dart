@@ -1,8 +1,6 @@
 import 'package:bsms/exports.dart';
 import 'package:bsms/src/views/service_record_detail_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:bsms/src/widgets/appointment_card.dart';
-import 'package:bsms/src/widgets/appointment_table.dart';
 import 'package:bsms/src/models/appointment_model.dart';
 
 class ServiceRecordScreen extends StatefulWidget {
@@ -16,7 +14,8 @@ class ServiceRecordScreen extends StatefulWidget {
 class _ServiceRecordScreenState extends State<ServiceRecordScreen> {
   // Using demo data from AppointmentModel
   final List<AppointmentModel> _records = AppointmentModel.demoData;
-  bool _showFilters = false;
+  DateTime? _selectedDate;
+  String _selectedStatus = 'All Status';
   int _currentPage = 1;
   final int _itemsPerPage = 10;
   String _searchQuery = '';
@@ -76,246 +75,85 @@ class _ServiceRecordScreenState extends State<ServiceRecordScreen> {
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
-      title: 'Services Record',
+      title: context.getTranslated('services_record'),
       selectedIndex: 1,
-      actions: [
-        IconButton(
-          onPressed: () {
-            setState(() {
-              _showFilters = !_showFilters;
-            });
-          },
-          icon: Icon(
-            Icons.filter_list,
-            color: _showFilters ? AppColors.primary : Colors.grey,
-          ),
-        ),
-      ],
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth > 800;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_showFilters) ...[
-                  _buildFilters(isWide),
-                  const SizedBox(height: 24),
-                ],
-
-                DynamicDataTable(
-                  data: _paginatedServiceRecords,
-                  onRowTap: (row) {
-                    Navigator.pushNamed(
-                      context,
-                      ServiceRecordDetailScreen.routeName,
-                      arguments: row,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 12),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildFilters(bool isWide) {
-    if (isWide) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Row 1: Date of Birth (Full width in design logic, or just first item)
-            const Text(
-              'Date of Birth',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            DataFilterBar(
+              selectedDate: _selectedDate,
+              onDateChanged: (d) => setState(() {
+                _selectedDate = d;
+                _currentPage = 1;
+              }),
+              statusOptions: const [
+                'All Status',
+                'Completed',
+                'Pending',
+                'Cancelled',
+              ],
+              selectedStatus: _selectedStatus,
+              onStatusChanged: (s) => setState(() {
+                _selectedStatus = s;
+                _currentPage = 1;
+              }),
+              searchHint: 'Search client or service...',
+              onSearchChanged: (q) => setState(() {
+                _searchQuery = q;
+                _currentPage = 1;
+              }),
             ),
-            const SizedBox(height: 8),
-            SizedBox(width: 300, child: _buildDatePickerField('20/01/2026')),
             const SizedBox(height: 24),
 
-            // Row 2: Date, Status, Search
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Date',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildDatePickerField('29/01/2026'),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Status',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildStatusDropdown(),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Search',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildSearchBar(),
-                    ],
-                  ),
-                ),
-              ],
+            DynamicDataTable(
+              data: _paginatedServiceRecords,
+              onRowTap: (row) {
+                Navigator.pushNamed(
+                  context,
+                  ServiceRecordDetailScreen.routeName,
+                  arguments: row,
+                );
+              },
             ),
+
+            const SizedBox(height: 12),
+
+            if (_filteredServiceRecords.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Page $_currentPage of ${(_filteredServiceRecords.length / _itemsPerPage).ceil() == 0 ? 1 : (_filteredServiceRecords.length / _itemsPerPage).ceil()}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: _currentPage > 1
+                        ? () => setState(() => _currentPage--)
+                        : null,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed:
+                        _currentPage <
+                            (_filteredServiceRecords.length / _itemsPerPage)
+                                .ceil()
+                        ? () => setState(() => _currentPage++)
+                        : null,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            const SizedBox(height: 20),
           ],
         ),
-      );
-    } else {
-      // Mobile Layout
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Date of Birth',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            _buildDatePickerField('20/01/2026'),
-            const SizedBox(height: 16),
-
-            const Text(
-              'Date',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            _buildDatePickerField('29/01/2026'),
-            const SizedBox(height: 16),
-
-            const Text(
-              'Status',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            _buildStatusDropdown(),
-            const SizedBox(height: 16),
-
-            const Text(
-              'Search',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            _buildSearchBar(),
-          ],
-        ),
-      );
-    }
-  }
-
-  Widget _buildDatePickerField(String date) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(date),
-          const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('All Status'),
-          const Icon(Icons.arrow_drop_down, size: 20, color: Colors.grey),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Search client or service...',
-        hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-        prefixIcon: const Icon(Icons.search, color: Colors.black54),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       ),
     );
   }

@@ -2,5 +2,15 @@
     "signin": "Login",
     "language": "Language",
     "english": "English",
-    "myanmar": "Myanmar"
+    "myanmar": "Myanmar",
+    "overview": "Overview",
+    "services_record": "Services Record",
+    "employees": "Employees",
+    "beauty_products": "Beauty Products",
+    "suppliers": "Suppliers",
+    "customer_management": "Customer Management",
+    "clients": "Clients",
+    "services": "Services",
+    "expense_income": "Expense / Income",
+    "coming_soon": " coming soon!"
 }

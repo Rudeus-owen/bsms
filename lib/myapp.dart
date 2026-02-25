@@ -92,6 +92,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 return const EmployeeEditScreen();
               case CustomerScreen.routeName:
                 return const CustomerScreen();
+              case CustomerEditScreen.routeName:
+                return const CustomerEditScreen();
               case LanguageScreen.routeName:
                 return const LanguageScreen();
               default:

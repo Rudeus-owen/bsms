@@ -22,6 +22,8 @@ export 'src/widgets/summary_card.dart';
 export 'src/widgets/data_filter_bar.dart';
 export 'src/widgets/dynamic_data_table.dart';
 export 'src/widgets/shimmer_loading.dart';
+export 'src/widgets/appointment_card.dart';
+export 'src/widgets/revenue_chart_card.dart';
 
 // ─── Views ──────────────────────────────────────────────
 export 'src/views/signinpage.dart';
@@ -29,6 +31,7 @@ export 'src/views/overview_screen.dart';
 export 'src/views/employee_screen.dart';
 export 'src/views/employee_edit_screen.dart';
 export 'src/views/customer_screen.dart';
+export 'src/views/customer_edit_screen.dart';
 export 'src/views/splash_screen.dart';
 
 // ─── API ────────────────────────────────────────────────
@@ -36,6 +39,9 @@ export 'src/api/api_config.dart';
 export 'src/api/api_service.dart';
 export 'src/api/apiauth.dart';
 export 'src/api/employee_service.dart';
+export 'src/api/customer_service.dart';
 
 // ─── Models ─────────────────────────────────────────────
 export 'src/models/employee.dart';
+export 'src/models/customer.dart';
+export 'src/models/appointment_model.dart';

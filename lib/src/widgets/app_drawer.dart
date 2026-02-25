@@ -14,17 +14,17 @@ class AppDrawer extends StatelessWidget {
   });
 
   static final List<_DrawerItem> _items = [
-    _DrawerItem(icon: Icons.dashboard_outlined, label: 'Overview'),
-    _DrawerItem(icon: Icons.receipt_long_outlined, label: 'Services Record'),
-    _DrawerItem(icon: Icons.people_outlined, label: 'Employees'),
-    _DrawerItem(icon: Icons.shopping_bag_outlined, label: 'Beauty Products'),
-    _DrawerItem(icon: Icons.local_shipping_outlined, label: 'Suppliers'),
-    _DrawerItem(icon: Icons.group_outlined, label: 'Customer Management'),
-    _DrawerItem(icon: Icons.person_outlined, label: 'Clients'),
-    _DrawerItem(icon: Icons.content_cut_outlined, label: 'Services'),
+    _DrawerItem(icon: Icons.dashboard_outlined, label: 'overview'),
+    _DrawerItem(icon: Icons.receipt_long_outlined, label: 'services_record'),
+    _DrawerItem(icon: Icons.people_outlined, label: 'employees'),
+    _DrawerItem(icon: Icons.shopping_bag_outlined, label: 'beauty_products'),
+    _DrawerItem(icon: Icons.local_shipping_outlined, label: 'suppliers'),
+    _DrawerItem(icon: Icons.group_outlined, label: 'customer_management'),
+    _DrawerItem(icon: Icons.person_outlined, label: 'clients'),
+    _DrawerItem(icon: Icons.content_cut_outlined, label: 'services'),
     _DrawerItem(
       icon: Icons.account_balance_wallet_outlined,
-      label: 'Expense/Income',
+      label: 'expense_income',
     ),
   ];
 
@@ -115,7 +115,7 @@ class AppDrawer extends StatelessWidget {
                       size: 22,
                     ),
                     title: Text(
-                      item.label,
+                      context.getTranslated(item.label),
                       style: TextStyle(
                         color: isSelected ? AppColors.primary : AppColors.black,
                         fontWeight: isSelected
@@ -170,7 +170,7 @@ class AppDrawer extends StatelessWidget {
                         messenger.showSnackBar(
                           SnackBar(
                             content: Text(
-                              '${_items[index].label} coming soon!',
+                              '${context.getTranslated(_items[index].label)}${context.getTranslated('coming_soon')}',
                             ),
                             duration: const Duration(seconds: 1),
                           ),

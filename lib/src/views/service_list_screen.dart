@@ -98,7 +98,7 @@ class _ServiceListScreenState extends State<ServiceListScreen>
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
-      title: 'Customers',
+      title: context.getTranslated('services'),
       selectedIndex: 7,
       body: RefreshIndicator(
         onRefresh: _refreshData,

@@ -1,37 +1,33 @@
 import 'package:bsms/src/api/api_service.dart';
-import 'package:bsms/src/models/employee.dart';
+import 'package:bsms/src/models/customer.dart';
 import 'package:bsms/src/helpers/api_error_handler.dart';
 import 'package:flutter/foundation.dart';
 
-class EmployeeService {
-  static Future<Map<String, dynamic>> getEmployees({
+class CustomerService {
+  static Future<Map<String, dynamic>> getCustomers({
     int page = 1,
     int limit = 10,
-    int? role,
-    String? branchId,
     String? search,
   }) async {
     try {
       final queryParams = {
         'page': page,
         'limit': limit,
-        if (role != null) 'role': role,
-        if (branchId != null) 'branch_id': branchId,
         if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final response = await ApiService.dio.get(
-        '/users/staffs',
+        '/customers',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200 && response.data['statuscode'] == 200) {
         final List<dynamic> data = response.data['data'];
-        final employees = data.map((json) => Employee.fromJson(json)).toList();
+        final customers = data.map((json) => Customer.fromJson(json)).toList();
 
         return {
           'success': true,
-          'data': employees,
+          'data': customers,
           'total': response.data['total'],
           'totalPages': response.data['totalPages'],
           'page': response.data['page'],
@@ -39,7 +35,7 @@ class EmployeeService {
       } else {
         return {
           'success': false,
-          'message': response.data['message'] ?? 'Failed to fetch employees',
+          'message': response.data['message'] ?? 'Failed to fetch customers',
         };
       }
     } catch (e) {
@@ -47,15 +43,15 @@ class EmployeeService {
     }
   }
 
-  // Get Single Employee Details
-  static Future<Map<String, dynamic>> getEmployeeDetails(String id) async {
+  // Get Single Customer Details
+  static Future<Map<String, dynamic>> getCustomerDetails(String id) async {
     try {
-      final response = await ApiService.dio.get('/users/staffs/$id');
+      final response = await ApiService.dio.get('/customers/$id');
 
       if (response.statusCode == 200 && response.data['statuscode'] == 200) {
         return {
           'success': true,
-          'data': Employee.fromJson(response.data['data']),
+          'data': Customer.fromJson(response.data['data']),
         };
       } else {
         return {'success': false, 'message': response.data['message']};
@@ -65,25 +61,25 @@ class EmployeeService {
     }
   }
 
-  // Create Employee
-  static Future<Map<String, dynamic>> createEmployee(
+  // Create Customer
+  static Future<Map<String, dynamic>> createCustomer(
     Map<String, dynamic> data,
   ) async {
     try {
-      debugPrint('Create Employee Request Data: $data');
+      debugPrint('Create Customer Request Data: $data');
       final response = await ApiService.dio.post(
-        '/users/staffs/create',
+        '/customers/create',
         data: data,
       );
       debugPrint(
-        'Create Employee Response: ${response.statusCode} ${response.data}',
+        'Create Customer Response: ${response.statusCode} ${response.data}',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map &&
             (response.data['statuscode'] == 200 ||
                 response.data['statuscode'] == 201)) {
-          return {'success': true, 'message': 'Employee created successfully'};
+          return {'success': true, 'message': 'Customer created successfully'};
         } else {
           final msg = response.data is Map
               ? response.data['message']
@@ -101,23 +97,23 @@ class EmployeeService {
     }
   }
 
-  // Update Employee
-  static Future<Map<String, dynamic>> updateEmployee(
+  // Update Customer
+  static Future<Map<String, dynamic>> updateCustomer(
     Map<String, dynamic> data,
   ) async {
     try {
-      debugPrint('Update Employee Request Data: $data');
+      debugPrint('Update Customer Request Data: $data');
       final response = await ApiService.dio.post(
-        '/users/staffs/update',
+        '/customers/update',
         data: data,
       );
       debugPrint(
-        'Update Employee Response: ${response.statusCode} ${response.data}',
+        'Update Customer Response: ${response.statusCode} ${response.data}',
       );
 
       if (response.statusCode == 200) {
         if (response.data['statuscode'] == 200) {
-          return {'success': true, 'message': 'Employee updated successfully'};
+          return {'success': true, 'message': 'Customer updated successfully'};
         } else {
           return {
             'success': false,
@@ -135,69 +131,27 @@ class EmployeeService {
     }
   }
 
-  // Delete Employee
-  static Future<Map<String, dynamic>> deleteEmployee(String id) async {
+  // Delete Customer
+  static Future<Map<String, dynamic>> deleteCustomer(String id) async {
     try {
-      debugPrint('Attempting to delete employee with ID: $id');
       final response = await ApiService.dio.post(
-        '/users/staffs/delete',
+        '/customers/delete',
         data: {'id': id},
-      );
-
-      debugPrint(
-        'Delete Employee Response: ${response.statusCode} ${response.data}',
-      );
-
-      if (response.statusCode == 200) {
-        // Many APIs check for both 'statuscode' and 'status_code' or 'status'
-        if (response.data['statuscode'] == 200 ||
-            response.data['status'] == 200) {
-          return {'success': true, 'message': 'Employee deleted successfully'};
-        } else {
-          return {
-            'success': false,
-            'message':
-                response.data['message'] ??
-                'Failed to delete (status mismatch)',
-          };
-        }
-      } else {
-        return {
-          'success': false,
-          'message':
-              response.data['message'] ?? 'Failed to delete (HTTP error)',
-        };
-      }
-    } catch (e) {
-      debugPrint('Delete Employee Exception: $e');
-      return {'success': false, 'message': ApiErrorHandler.getMessage(e)};
-    }
-  }
-
-  // Update Password
-  static Future<Map<String, dynamic>> updatePassword(
-    String userId,
-    String newPassword,
-  ) async {
-    try {
-      final response = await ApiService.dio.post(
-        '/users/update-password',
-        data: {'user_id': userId, 'new_password': newPassword},
       );
 
       if (response.statusCode == 200) {
         if (response.data['statuscode'] == 200) {
-          return {'success': true, 'message': 'Password updated successfully'};
+          return {'success': true, 'message': 'Customer deleted successfully'};
         } else {
           return {
             'success': false,
-            'message': response.data['message'] ?? 'Failed to update password',
+            'message': response.data['message'] ?? 'Failed to delete',
           };
         }
       } else {
         return {
           'success': false,
-          'message': response.data['message'] ?? 'Failed to update password',
+          'message': response.data['message'] ?? 'Failed to delete',
         };
       }
     } catch (e) {

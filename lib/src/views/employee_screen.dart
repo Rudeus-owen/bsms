@@ -141,7 +141,7 @@ class _EmployeeScreenState extends State<EmployeeScreen>
   @override
   Widget build(BuildContext context) {
     return MainScaffold(
-      title: 'Employees',
+      title: context.getTranslated('employees'),
       selectedIndex: 2,
       body: RefreshIndicator(
         onRefresh: _fetchEmployees,
