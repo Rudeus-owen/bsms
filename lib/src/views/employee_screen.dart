@@ -206,39 +206,35 @@ class _EmployeeScreenState extends State<EmployeeScreen>
 
                     const SizedBox(height: 12),
 
-                    // ── Summary Cards (3‑across, fits any width) ─────────
-                    IntrinsicHeight(
+                    // ── Summary Cards (Horizontally scrollable) ──────────
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(bottom: 8),
+                      clipBehavior: Clip.none,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.people,
-                              iconColor: Colors.blue.shade700,
-                              iconBgColor: Colors.blue.shade50,
-                              count: _totalCount,
-                              label: 'Total',
-                            ),
+                          SummaryCard(
+                            icon: Icons.people,
+                            iconColor: Colors.blue.shade700,
+                            iconBgColor: Colors.blue.shade50,
+                            count: _totalCount,
+                            label: 'Total',
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.person,
-                              iconColor: Colors.green.shade700,
-                              iconBgColor: Colors.green.shade50,
-                              count: _expCount,
-                              label: 'Experienced',
-                            ),
+                          const SizedBox(width: 12),
+                          SummaryCard(
+                            icon: Icons.person,
+                            iconColor: Colors.green.shade700,
+                            iconBgColor: Colors.green.shade50,
+                            count: _expCount,
+                            label: 'Experienced',
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.person_outline,
-                              iconColor: Colors.orange.shade700,
-                              iconBgColor: Colors.orange.shade50,
-                              count: _nonExpCount,
-                              label: 'Non-Experience',
-                            ),
+                          const SizedBox(width: 12),
+                          SummaryCard(
+                            icon: Icons.person_outline,
+                            iconColor: Colors.orange.shade700,
+                            iconBgColor: Colors.orange.shade50,
+                            count: _nonExpCount,
+                            label: 'Non-Experience',
                           ),
                         ],
                       ),

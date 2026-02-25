@@ -176,38 +176,34 @@ class _CustomerScreenState extends State<CustomerScreen>
                     ),
                     const SizedBox(height: 12),
 
-                    IntrinsicHeight(
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(bottom: 8),
+                      clipBehavior: Clip.none,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.people,
-                              iconColor: Colors.blue.shade700,
-                              iconBgColor: Colors.blue.shade50,
-                              count: _totalCount,
-                              label: 'Total Customers',
-                            ),
+                          SummaryCard(
+                            icon: Icons.people,
+                            iconColor: Colors.blue.shade700,
+                            iconBgColor: Colors.blue.shade50,
+                            count: _totalCount,
+                            label: 'Total Customers',
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.star,
-                              iconColor: Colors.amber.shade700,
-                              iconBgColor: Colors.amber.shade50,
-                              count: _highSpendersCount,
-                              label: 'VIP Members',
-                            ),
+                          const SizedBox(width: 12),
+                          SummaryCard(
+                            icon: Icons.star,
+                            iconColor: Colors.amber.shade700,
+                            iconBgColor: Colors.amber.shade50,
+                            count: _highSpendersCount,
+                            label: 'VIP Members',
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SummaryCard(
-                              icon: Icons.person_add,
-                              iconColor: Colors.green.shade700,
-                              iconBgColor: Colors.green.shade50,
-                              count: _newMembersCount,
-                              label: 'New (This Year)',
-                            ),
+                          const SizedBox(width: 12),
+                          SummaryCard(
+                            icon: Icons.person_add,
+                            iconColor: Colors.green.shade700,
+                            iconBgColor: Colors.green.shade50,
+                            count: _newMembersCount,
+                            label: 'New (This Year)',
                           ),
                         ],
                       ),
