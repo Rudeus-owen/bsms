@@ -126,7 +126,9 @@ class _EmployeeScreenState extends State<EmployeeScreen>
             'role': e.roleName,
             'salary': '${NumberFormat('#,###').format(e.salary)} MMK',
             'commission': '${e.commissionRate}%',
-            'experience': e.salary > 200000 ? 'Experienced' : 'Non-experienced',
+            'experience': e.salary > 200000
+                ? 'experienced_val'
+                : 'non_experienced_val',
             'status': e.isActive ? 'Active' : 'Inactive',
             'joinDate': e.createdAt.toIso8601String().split('T')[0],
             'original': e,
@@ -226,7 +228,7 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                             iconColor: Colors.green.shade700,
                             iconBgColor: Colors.green.shade50,
                             count: _expCount,
-                            label: 'Experienced',
+                            label: context.getTranslated('experienced'),
                           ),
                           const SizedBox(width: 12),
                           SummaryCard(
@@ -234,7 +236,7 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                             iconColor: Colors.orange.shade700,
                             iconBgColor: Colors.orange.shade50,
                             count: _nonExpCount,
-                            label: 'Non-Experience',
+                            label: context.getTranslated('non_experienced'),
                           ),
                         ],
                       ),
@@ -255,11 +257,14 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                         _selectedStatus = s;
                         _currentPage = 1;
                       }),
-                      searchHint: 'Search employee...',
+                      searchHint: context.getTranslated('search_employee'),
                       onSearchChanged: (q) => setState(() {
                         _searchQuery = q;
                         _currentPage = 1;
                       }),
+                      dateLabel: context.getTranslated('date'),
+                      statusLabel: context.getTranslated('status'),
+                      searchLabel: context.getTranslated('search'),
                     ),
 
                     const SizedBox(height: 12),
@@ -272,7 +277,21 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                     const SizedBox(height: 8),
 
                     DynamicDataTable(
-                      data: _paginatedEmployees,
+                      data: _paginatedEmployees.map((row) {
+                        // Translate experience values for display
+                        final newRow = Map<String, dynamic>.from(row);
+                        if (newRow['experience'] == 'experienced_val') {
+                          newRow['experience'] = context.getTranslated(
+                            'experienced',
+                          );
+                        } else if (newRow['experience'] ==
+                            'non_experienced_val') {
+                          newRow['experience'] = context.getTranslated(
+                            'non_experienced',
+                          );
+                        }
+                        return newRow;
+                      }).toList(),
                       columnKeys: const [
                         'name',
                         'phone',
@@ -283,6 +302,20 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                         'status',
                         'joinDate',
                       ],
+                      columnLabels: {
+                        'name': context.getTranslated('name'),
+                        'phone': context.getTranslated('phone'),
+                        'role': context.getTranslated('role'),
+                        'salary': context.getTranslated('salary'),
+                        'commission': context.getTranslated('commission'),
+                        'experience': context.getTranslated('experience'),
+                        'status': context.getTranslated('status'),
+                        'joinDate': context.getTranslated('join_date'),
+                      },
+                      customStatusColors: {
+                        context.getTranslated('experienced'): Colors.blue,
+                        context.getTranslated('non_experienced'): Colors.orange,
+                      },
                       onRowTap: (row) {
                         Navigator.pushNamed(
                           context,

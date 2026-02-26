@@ -230,6 +230,9 @@ class _CustomerScreenState extends State<CustomerScreen>
                         _currentPage = 1;
                         _fetchCustomers();
                       }),
+                      dateLabel: context.getTranslated('date'),
+                      statusLabel: context.getTranslated('status'),
+                      searchLabel: context.getTranslated('search'),
                     ),
                     const SizedBox(height: 12),
 

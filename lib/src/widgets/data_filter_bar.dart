@@ -10,6 +10,9 @@ class DataFilterBar extends StatelessWidget {
   final ValueChanged<String> onStatusChanged;
   final String searchHint;
   final ValueChanged<String> onSearchChanged;
+  final String dateLabel;
+  final String statusLabel;
+  final String searchLabel;
 
   const DataFilterBar({
     super.key,
@@ -20,6 +23,9 @@ class DataFilterBar extends StatelessWidget {
     required this.onStatusChanged,
     this.searchHint = 'Search...',
     required this.onSearchChanged,
+    this.dateLabel = 'Date',
+    this.statusLabel = 'Status',
+    this.searchLabel = 'Search',
   });
 
   static const double _inputHeight = 44.0;
@@ -70,22 +76,22 @@ class DataFilterBar extends StatelessWidget {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: AppFontSizes.sm,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: AppFontSizes.sm,
+        fontWeight: FontWeight.w600,
+        color: AppColors.black,
+      ),
+    ),
+  );
 
   Widget _buildDateField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Date'),
+        _label(dateLabel),
         InkWell(
           onTap: () => _pickDate(context),
           borderRadius: BorderRadius.circular(_radius),
@@ -111,8 +117,11 @@ class DataFilterBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.calendar_today_outlined,
-                    size: 18, color: AppColors.grey),
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 18,
+                  color: AppColors.grey,
+                ),
               ],
             ),
           ),
@@ -125,7 +134,7 @@ class DataFilterBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Status'),
+        _label(statusLabel),
         Container(
           height: _inputHeight,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -138,9 +147,14 @@ class DataFilterBar extends StatelessWidget {
               value: selectedStatus,
               isExpanded: true,
               isDense: true,
-              icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.grey),
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                color: AppColors.grey,
+              ),
               style: const TextStyle(
-                  fontSize: AppFontSizes.md, color: AppColors.black),
+                fontSize: AppFontSizes.md,
+                color: AppColors.black,
+              ),
               items: statusOptions
                   .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                   .toList(),
@@ -158,19 +172,26 @@ class DataFilterBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Search'),
+        _label(searchLabel),
         SizedBox(
           height: _inputHeight,
           child: TextField(
             onChanged: onSearchChanged,
             decoration: InputDecoration(
               hintText: searchHint,
-              hintStyle:
-                  const TextStyle(color: AppColors.grey, fontSize: AppFontSizes.md),
-              prefixIcon:
-                  const Icon(Icons.search, color: AppColors.grey, size: 20),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              hintStyle: const TextStyle(
+                color: AppColors.grey,
+                fontSize: AppFontSizes.md,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.grey,
+                size: 20,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 0,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(_radius),
                 borderSide: const BorderSide(color: _border),
@@ -181,8 +202,10 @@ class DataFilterBar extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(_radius),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
               ),
             ),
           ),

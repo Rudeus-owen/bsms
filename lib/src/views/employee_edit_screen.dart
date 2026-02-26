@@ -436,7 +436,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
                               color: AppColors.primary,
                             ),
                             onPressed: _showOptionsBottomSheet,
-                            tooltip: 'Employee Options',
+                            tooltip: 'User Options',
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
@@ -718,7 +718,7 @@ class _EmployeeEditScreenState extends State<EmployeeEditScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Employee Options',
+              'User Options',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

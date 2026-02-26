@@ -138,6 +138,9 @@ class _ServiceListScreenState extends State<ServiceListScreen>
                   _searchQuery = q;
                   _currentPage = 1;
                 }),
+                dateLabel: context.getTranslated('date'),
+                statusLabel: context.getTranslated('status'),
+                searchLabel: context.getTranslated('search'),
               ),
               const SizedBox(height: 12),
 

@@ -17,5 +17,19 @@
     "upcoming_appointments": "Upcoming Appointments",
     "new_appointment": "New Appointment",
     "new_employee": "New Employee",
-    "manage_team": "Manage your salon team members"
+    "manage_team": "Manage your salon team members",
+    "date": "Date",
+    "status": "Status",
+    "search": "Search",
+    "all_status": "All Status",
+    "name": "Name",
+    "phone": "Phone",
+    "role": "Role",
+    "salary": "Salary",
+    "commission": "Commission",
+    "experience": "Experience",
+    "join_date": "Join Date",
+    "experienced": "Experienced",
+    "non_experienced": "Non Experienced",
+    "search_employee": "Search employee..."
 }

@@ -6,6 +6,7 @@ class DynamicDataTable extends StatelessWidget {
   final void Function(Map<String, dynamic> rowData)? onRowTap;
   final List<String>? columnKeys;
   final Map<String, String>? columnLabels;
+  final Map<String, Color>? customStatusColors;
 
   const DynamicDataTable({
     super.key,
@@ -13,6 +14,7 @@ class DynamicDataTable extends StatelessWidget {
     this.onRowTap,
     this.columnKeys,
     this.columnLabels,
+    this.customStatusColors,
   });
 
   @override
@@ -27,8 +29,10 @@ class DynamicDataTable extends StatelessWidget {
             children: [
               Icon(Icons.inbox_outlined, size: 48, color: AppColors.grey),
               SizedBox(height: 8),
-              Text('No data available',
-                  style: TextStyle(color: AppColors.grey, fontSize: 14)),
+              Text(
+                'No data available',
+                style: TextStyle(color: AppColors.grey, fontSize: 14),
+              ),
             ],
           ),
         ),
@@ -110,15 +114,20 @@ class DynamicDataTable extends StatelessWidget {
                             Text(
                               row[keys[2]]?.toString() ?? '',
                               style: const TextStyle(
-                                  fontSize: 12, color: AppColors.grey),
+                                fontSize: 12,
+                                color: AppColors.grey,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     // Arrow indicator
                     if (onRowTap != null)
-                      const Icon(Icons.chevron_right,
-                          color: AppColors.grey, size: 20),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.grey,
+                        size: 20,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -154,7 +163,10 @@ class DynamicDataTable extends StatelessWidget {
         child: Text(
           str,
           style: TextStyle(
-              color: statusColor, fontSize: 11, fontWeight: FontWeight.w500),
+            color: statusColor,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       );
     }
@@ -165,12 +177,12 @@ class DynamicDataTable extends StatelessWidget {
         Text(
           '$label: ',
           style: const TextStyle(
-              fontSize: 11, color: AppColors.grey, fontWeight: FontWeight.w500),
+            fontSize: 11,
+            color: AppColors.grey,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        Text(
-          str,
-          style: const TextStyle(fontSize: 11, color: AppColors.black),
-        ),
+        Text(str, style: const TextStyle(fontSize: 11, color: AppColors.black)),
       ],
     );
   }
@@ -196,8 +208,10 @@ class DynamicDataTable extends StatelessWidget {
                 fontSize: 12,
                 color: AppColors.black,
               ),
-              dataTextStyle:
-                  const TextStyle(fontSize: 13, color: AppColors.black),
+              dataTextStyle: const TextStyle(
+                fontSize: 13,
+                color: AppColors.black,
+              ),
               columnSpacing: 28,
               horizontalMargin: 16,
               columns: keys.map((key) {
@@ -206,8 +220,9 @@ class DynamicDataTable extends StatelessWidget {
               }).toList(),
               rows: data.map((row) {
                 return DataRow(
-                  onSelectChanged:
-                      onRowTap != null ? (_) => onRowTap!(row) : null,
+                  onSelectChanged: onRowTap != null
+                      ? (_) => onRowTap!(row)
+                      : null,
                   cells: keys.map((key) {
                     return DataCell(_buildCellContent(row[key]));
                   }).toList(),
@@ -225,8 +240,11 @@ class DynamicDataTable extends StatelessWidget {
       return const Text('-', style: TextStyle(color: AppColors.grey));
     }
     if (value is bool) {
-      return Icon(value ? Icons.check_circle : Icons.cancel,
-          color: value ? Colors.green : Colors.red, size: 18);
+      return Icon(
+        value ? Icons.check_circle : Icons.cancel,
+        color: value ? Colors.green : Colors.red,
+        size: 18,
+      );
     }
     if (value is num) {
       return Text(
@@ -244,11 +262,14 @@ class DynamicDataTable extends StatelessWidget {
           color: statusColor.withAlpha(20),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(str,
-            style: TextStyle(
-                color: statusColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500)),
+        child: Text(
+          str,
+          style: TextStyle(
+            color: statusColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       );
     }
     return Text(str);
@@ -268,6 +289,11 @@ class DynamicDataTable extends StatelessWidget {
   }
 
   Color? _getStatusColor(String str) {
+    // Check custom status colors first (for translated strings)
+    if (customStatusColors != null) {
+      final customColor = customStatusColors![str];
+      if (customColor != null) return customColor;
+    }
     const map = {
       'active': Colors.green,
       'paid': Colors.green,
@@ -282,13 +308,14 @@ class DynamicDataTable extends StatelessWidget {
 
   String _formatHeader(String key) {
     return key
-        .replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}')
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}')
         .replaceAll('_', ' ')
         .split(' ')
-        .map((w) => w.isNotEmpty
-            ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}'
-            : '')
+        .map(
+          (w) => w.isNotEmpty
+              ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}'
+              : '',
+        )
         .join(' ');
   }
 }
