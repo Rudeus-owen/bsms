@@ -163,9 +163,9 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                     // ── Header: subtitle + add button ────────────────────
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Manage your salon team members',
+                            context.getTranslated('manage_team'),
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.grey,
@@ -183,7 +183,7 @@ class _EmployeeScreenState extends State<EmployeeScreen>
                               ).then((_) => _fetchEmployees());
                             },
                             icon: const Icon(Icons.add, size: 15),
-                            label: const Text('New Employee'),
+                            label: Text(context.getTranslated('new_employee')),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,

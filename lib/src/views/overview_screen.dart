@@ -50,7 +50,7 @@ class OverviewScreen extends StatelessWidget {
         }
       },
       child: MainScaffold(
-        title: 'Overview',
+        title: context.getTranslated('overview'),
         selectedIndex: 0,
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -84,7 +84,10 @@ class OverviewScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                   flex: 3,
-                                  child: _buildUpcomingAppointments(isMobile),
+                                  child: _buildUpcomingAppointments(
+                                    context,
+                                    isMobile,
+                                  ),
                                 ),
                                 const SizedBox(width: 24),
                                 Expanded(
@@ -96,7 +99,7 @@ class OverviewScreen extends StatelessWidget {
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildUpcomingAppointments(isMobile),
+                                _buildUpcomingAppointments(context, isMobile),
                                 SizedBox(height: paddingAmt),
                                 _buildTopServices(isMobile),
                               ],
@@ -118,26 +121,26 @@ class OverviewScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
-            'Welcome back! Here\'s what\'s happening today',
-            style: TextStyle(fontSize: 14, color: AppColors.grey),
+            context.getTranslated('welcome_back'),
+            style: const TextStyle(fontSize: 14, color: AppColors.grey),
           ),
         ),
         const SizedBox(width: 16),
-        _buildNewApptButton(isMobile),
+        _buildNewApptButton(context, isMobile),
       ],
     );
   }
 
-  Widget _buildNewApptButton(bool isMobile) {
+  Widget _buildNewApptButton(BuildContext context, bool isMobile) {
     return SizedBox(
       height: 34,
       child: ElevatedButton.icon(
         onPressed: () {},
         icon: const Icon(Icons.add, color: AppColors.white, size: 15),
-        label: const Text(
-          'New Appointment',
+        label: Text(
+          context.getTranslated('new_appointment'),
           style: TextStyle(
             color: AppColors.white,
             fontWeight: FontWeight.w600,
@@ -356,7 +359,7 @@ class OverviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingAppointments(bool isMobile) {
+  Widget _buildUpcomingAppointments(BuildContext context, bool isMobile) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: BoxDecoration(
@@ -371,7 +374,7 @@ class OverviewScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Upcoming Appointments',
+                context.getTranslated('upcoming_appointments'),
                 style: TextStyle(
                   fontSize: isMobile ? 16 : 18,
                   fontWeight: FontWeight.w800,

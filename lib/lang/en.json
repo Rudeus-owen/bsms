@@ -12,5 +12,10 @@
     "clients": "Clients",
     "services": "Services",
     "expense_income": "Expense / Income",
-    "coming_soon": " coming soon!"
+    "coming_soon": " coming soon!",
+    "welcome_back": "Welcome back! Here's what's happening today",
+    "upcoming_appointments": "Upcoming Appointments",
+    "new_appointment": "New Appointment",
+    "new_employee": "New Employee",
+    "manage_team": "Manage your salon team members"
 }
